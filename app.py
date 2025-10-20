@@ -199,9 +199,9 @@ st.markdown("""
     /* Content area */
     .block-container {
         background-color: #ffffff;
-        border-radius: 10px;
+        border-radius: 8px;
         padding: 1rem !important;
-        max-width: 100% !important;
+        max-width: 50% !important;
     }
 
     /* Headers */
@@ -214,9 +214,9 @@ st.markdown("""
 
     /* Buttons - Much smaller for mobile */
     .stButton > button {
-        width: 100%;
-        height: 38px !important;
-        font-size: 13px !important;
+        width: 50%;
+        height: 20px !important;
+        font-size: 8px !important;
         font-weight: 600;
         margin: 3px 0 !important;
         padding: 0 8px !important;
@@ -312,7 +312,7 @@ st.markdown("""
 
     /* Force button columns to be equal width */
     [data-testid="column"] > div {
-        width: 100% !important;
+        width: 50% !important;
     }
 
     /* Success/Error messages */
