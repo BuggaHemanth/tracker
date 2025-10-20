@@ -218,11 +218,11 @@ st.markdown("""
     .stButton > button {
         width: 100%;
         height: 40px !important;
-        font-size: 12px !important;
-        font-weight: 600;
-        margin: 2px 0 !important;
-        padding: 0 2px !important;
-        border-radius: 5px;
+        font-size: 6px !important;
+        font-weight: 200;
+        margin: 1px 0 !important;
+        padding: 0 1px !important;
+        border-radius: 2px;
         transition: all 0.1s ease;
         white-space: nowrap;
         box-sizing: border-box !important;
@@ -232,69 +232,69 @@ st.markdown("""
     .stButton > button[kind="primary"] {
         background: rgb(0, 0, 104) !important;
         color: white !important;
-        border: 2px solid rgb(0, 0, 104) !important;
+        border: 1px solid rgb(0, 0, 104) !important;
     }
 
     /* Secondary buttons */
     .stButton > button[kind="secondary"] {
         background: #e6f2ff !important;
         color: rgb(0, 0, 104) !important;
-        border: 2px solid #99ccff !important;
+        border: 1px solid #99ccff !important;
     }
 
     .stButton > button:hover {
-        transform: scale(1.02);
-        box-shadow: 0 2px 8px rgba(0, 0, 104, 0.3) !important;
+        transform: scale(0.7);
+        box-shadow: 0 1px 4px rgba(0, 0, 104, 0.3) !important;
     }
 
     /* Text inputs - Compact */
     .stTextInput > div > div > input,
     .stNumberInput > div > div > input {
-        font-size: 16px !important;
-        padding: 10px !important;
-        border: 2px solid #99ccff !important;
-        border-radius: 6px !important;
+        font-size: 8px !important;
+        padding: 5px !important;
+        border: 1px solid #99ccff !important;
+        border-radius: 2px !important;
     }
 
     .stTextInput > div > div > input:focus,
     .stNumberInput > div > div > input:focus {
         border-color: rgb(0, 0, 104) !important;
-        box-shadow: 0 0 0 2px rgba(0, 0, 104, 0.2) !important;
+        box-shadow: 0 0 0 1px rgba(0, 0, 104, 0.2) !important;
     }
 
     /* Metric cards - Compact */
     [data-testid="stMetric"] {
         background: #e6f2ff;
-        padding: 10px !important;
-        border-radius: 8px;
-        border: 2px solid #99ccff;
+        padding: 3px !important;
+        border-radius: 2px;
+        border: 1px solid #99ccff;
     }
 
     [data-testid="stMetricValue"] {
-        font-size: 20px !important;
+        font-size: 8px !important;
         font-weight: bold !important;
         color: rgb(0, 0, 104) !important;
     }
 
     [data-testid="stMetricLabel"] {
-        font-size: 12px !important;
+        font-size: 8px !important;
         color: rgb(0, 0, 104) !important;
-        font-weight: 600 !important;
+        font-weight: 200 !important;
     }
 
     /* Tabs */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 4px;
+        gap: 2px;
         background-color: #e6f2ff;
-        border-radius: 8px;
-        padding: 4px;
+        border-radius: 4px;
+        padding: 2px;
     }
 
     .stTabs [data-baseweb="tab"] {
         color: rgb(0, 0, 104) !important;
-        font-weight: 600;
-        font-size: 14px !important;
-        padding: 8px 12px !important;
+        font-weight: 200;
+        font-size: 8px !important;
+        padding: 4px 6px !important;
     }
 
     .stTabs [aria-selected="true"] {
@@ -304,9 +304,9 @@ st.markdown("""
 
     /* Date inputs */
     .stDateInput > div > div > input {
-        font-size: 14px !important;
-        border: 2px solid #99ccff !important;
-        border-radius: 6px !important;
+        font-size: 8px !important;
+        border: 1px solid #99ccff !important;
+        border-radius: 2px !important;
     }
 
     /* Force columns to display side by side - FIT TO SCREEN */
@@ -322,7 +322,7 @@ st.markdown("""
         flex-direction: row !important;
         flex-wrap: nowrap !important;
         gap: 2px !important;
-        width: 100% !important;
+        width: 80% !important;
         overflow: visible !important;
     }
 
@@ -340,7 +340,7 @@ st.markdown("""
 
     /* Make buttons more compact */
     .stButton {
-        width: 100% !important;
+        width: 80% !important;
     }
 
     /* Main app container */
@@ -358,23 +358,23 @@ st.markdown("""
     .stSuccess {
         background-color: #d4edda !important;
         color: #155724 !important;
-        padding: 12px !important;
-        border-radius: 8px !important;
-        border-left: 4px solid #28a745 !important;
+        padding: 6px !important;
+        border-radius: 4px !important;
+        border-left: 2px solid #28a745 !important;
         font-weight: bold !important;
     }
 
     .stError {
         background-color: #f8d7da !important;
         color: #721c24 !important;
-        border-left: 4px solid #dc3545 !important;
+        border-left: 2px solid #dc3545 !important;
     }
 
     /* Info messages */
     .stInfo {
         background-color: #d1ecf1 !important;
         color: #0c5460 !important;
-        font-size: 14px !important;
+        font-size: 7px !important;
     }
 
     /* Hide sidebar */
