@@ -200,10 +200,17 @@ st.markdown("""
     .block-container {
         background-color: #ffffff;
         border-radius: 8px;
-        padding: 0.5rem !important;
+        padding: 1rem 0.5rem !important;
         max-width: 100vw !important;
         width: 100% !important;
+        margin: 0 auto !important;
         box-sizing: border-box !important;
+    }
+
+    @media (max-width: 768px) {
+        .block-container {
+            padding: 0.75rem 0.25rem !important;
+        }
     }
 
     /* Headers */
@@ -219,16 +226,25 @@ st.markdown("""
         width: 100% !important;
         max-width: 100% !important;
         height: 40px !important;
-        font-size: 13px !important;
+        font-size: 14px !important;
         font-weight: 500;
         margin: 2px 0 !important;
-        padding: 0 8px !important;
+        padding: 0 4px !important;
         border-radius: 4px;
         transition: all 0.2s ease;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         box-sizing: border-box !important;
+        display: block !important;
+    }
+
+    @media (max-width: 768px) {
+        .stButton > button {
+            font-size: 12px !important;
+            padding: 0 2px !important;
+            height: 38px !important;
+        }
     }
 
     /* Primary buttons - Navy Blue RGB(0,0,104) */
@@ -314,11 +330,17 @@ st.markdown("""
 
     /* Force columns to display side by side - FIT TO SCREEN */
     div[data-testid="column"] {
-        padding: 0px 2px !important;
+        padding: 0px 3px !important;
         flex: 1 1 0 !important;
         min-width: 0 !important;
-        max-width: 100% !important;
+        max-width: 50% !important;
         box-sizing: border-box !important;
+    }
+
+    @media (max-width: 768px) {
+        div[data-testid="column"] {
+            padding: 0px 2px !important;
+        }
     }
 
     /* Force horizontal block to never wrap - STAY WITHIN SCREEN */
@@ -326,20 +348,34 @@ st.markdown("""
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
-        gap: 4px !important;
+        gap: 6px !important;
         width: 100% !important;
         max-width: 100% !important;
-        overflow: hidden !important;
+        overflow: visible !important;
         box-sizing: border-box !important;
+        margin: 0 !important;
+    }
+
+    @media (max-width: 768px) {
+        div[data-testid="stHorizontalBlock"] {
+            gap: 4px !important;
+        }
     }
 
     /* Ensure equal width columns - NO OVERFLOW */
     div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
         flex: 1 1 0 !important;
         min-width: 0 !important;
-        max-width: 100% !important;
-        width: auto !important;
+        max-width: 50% !important;
+        width: 50% !important;
         box-sizing: border-box !important;
+    }
+
+    @media (max-width: 768px) {
+        div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+            max-width: 50% !important;
+            width: 50% !important;
+        }
     }
 
     /* Prevent text inputs from being too wide */
@@ -359,12 +395,24 @@ st.markdown("""
     /* Main app container */
     .main {
         max-width: 100vw !important;
+        width: 100vw !important;
         overflow-x: hidden !important;
+        padding: 0 !important;
+    }
+
+    .main > div {
+        max-width: 100% !important;
     }
 
     /* Ensure viewport constraint */
     body {
         overflow-x: hidden !important;
+        max-width: 100vw !important;
+    }
+
+    html {
+        overflow-x: hidden !important;
+        max-width: 100vw !important;
     }
 
     /* Success/Error messages */
