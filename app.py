@@ -212,11 +212,11 @@ st.markdown("""
     h2 { font-size: 18px !important; margin: 10px 0 5px 0 !important; }
     h3 { font-size: 16px !important; margin: 8px 0 !important; }
 
-    /* Buttons - Much smaller for mobile */
+    /* Buttons - Compact for mobile */
     .stButton > button {
-        width: 50%;
-        height: 20px !important;
-        font-size: 8px !important;
+        width: 100%;
+        height: 42px !important;
+        font-size: 14px !important;
         font-weight: 600;
         margin: 3px 0 !important;
         padding: 0 8px !important;
@@ -305,14 +305,26 @@ st.markdown("""
         border-radius: 6px !important;
     }
 
-    /* Column spacing - Tighter */
+    /* Force columns to display side by side - NO STACKING */
     div[data-testid="column"] {
-        padding: 0px 4px !important;
+        padding: 0px 3px !important;
+        flex: 1 1 0px !important;
+        min-width: 0 !important;
+        width: 50% !important;
     }
 
-    /* Force button columns to be equal width */
-    [data-testid="column"] > div {
-        width: 50% !important;
+    /* Force horizontal block to never wrap */
+    div[data-testid="stHorizontalBlock"] {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        gap: 6px !important;
+    }
+
+    /* Ensure equal width columns */
+    div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+        flex: 1 !important;
+        min-width: 0 !important;
     }
 
     /* Success/Error messages */
@@ -476,12 +488,7 @@ else:
             with tab1:
                 st.header("New Entry")
 
-                name = st.text_input("Name", value=st.session_state.name_input, placeholder="Enter person/vendor name", key="name_field")
-                amount = st.number_input("Amount (₹)", value=st.session_state.amount_input, min_value=0.0, step=10.0, format="%.0f", key="amount_field")
-                description = st.text_input("Description", value=st.session_state.description_input, placeholder="Add details...", key="desc_field")
-
-                st.subheader("Type")
-                # Hardcoded 2 columns for Type buttons
+                # Type buttons FIRST - Hardcoded 2 columns (Paid and Received side by side)
                 col1, col2 = st.columns([1, 1])
                 with col1:
                     btn_type = "primary" if st.session_state.transaction_type == "Paid" else "secondary"
@@ -494,9 +501,11 @@ else:
                         st.session_state.transaction_type = "Received"
                         st.rerun()
 
-                # Payment Mode Buttons - Hardcoded 2x2 layout (2 rows, 2 columns)
-                st.subheader("Payment Mode")
+                name = st.text_input("Name", value=st.session_state.name_input, placeholder="Enter person/vendor name", key="name_field")
+                amount = st.number_input("Amount (₹)", value=st.session_state.amount_input, min_value=0.0, step=10.0, format="%.0f", key="amount_field")
+                description = st.text_input("Description", value=st.session_state.description_input, placeholder="Add details...", key="desc_field")
 
+                # Payment Mode Buttons - Hardcoded 2x2 layout (2 rows, 2 columns) - NO TITLE
                 # Row 1: Online and GPay
                 col1, col2 = st.columns([1, 1])
                 with col1:
