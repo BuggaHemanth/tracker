@@ -223,27 +223,27 @@ st.markdown("""
 
     /* Buttons - Compact for mobile - FIT TO SCREEN */
     .stButton > button {
-        width: 100% !important;
+        width: auto !important;
         max-width: 100% !important;
         height: 40px !important;
         font-size: 14px !important;
         font-weight: 500;
-        margin: 2px 0 !important;
-        padding: 0 4px !important;
+        margin: 2px auto !important;
+        padding: 8px 16px !important;
         border-radius: 4px;
         transition: all 0.2s ease;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         box-sizing: border-box !important;
-        display: block !important;
+        display: inline-block !important;
     }
 
     @media (max-width: 768px) {
         .stButton > button {
-            font-size: 12px !important;
-            padding: 0 2px !important;
-            height: 38px !important;
+            font-size: 11px !important;
+            padding: 6px 10px !important;
+            height: 36px !important;
         }
     }
 
@@ -387,9 +387,12 @@ st.markdown("""
 
     /* Make buttons fit within their container */
     .stButton {
-        width: 100% !important;
+        width: auto !important;
         max-width: 100% !important;
         box-sizing: border-box !important;
+        text-align: center !important;
+        display: flex !important;
+        justify-content: center !important;
     }
 
     /* Main app container */
