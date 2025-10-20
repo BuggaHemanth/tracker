@@ -265,21 +265,21 @@ st.markdown("""
     /* Metric cards - Compact */
     [data-testid="stMetric"] {
         background: #e6f2ff;
-        padding: 10px !important;
-        border-radius: 8px;
+        padding: 2px !important;
+        border-radius: 2px;
         border: 2px solid #99ccff;
     }
 
     [data-testid="stMetricValue"] {
-        font-size: 20px !important;
+        font-size: 15px !important;
         font-weight: bold !important;
         color: rgb(0, 0, 104) !important;
     }
 
     [data-testid="stMetricLabel"] {
-        font-size: 12px !important;
+        font-size: 8px !important;
         color: rgb(0, 0, 104) !important;
-        font-weight: 600 !important;
+        font-weight: 500 !important;
     }
 
     /* Tabs */
