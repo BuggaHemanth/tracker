@@ -8,6 +8,22 @@ from reportlab.pdfgen import canvas
 import tempfile
 import os
 
+import streamlit as st
+from google.oauth2 import service_account
+import gspread
+
+# Use secrets directly (no local file)
+credentials = service_account.Credentials.from_service_account_info(
+    st.secrets["gcp_service_account"],
+    scopes=["https://www.googleapis.com/auth/spreadsheets"],
+)
+
+gc = gspread.authorize(credentials)
+sheet = gc.open_by_key("your_google_sheet_id_here")
+
+st.success("✅ Connected to Google Sheets!")
+
+
 # ---------- PAGE CONFIG ----------
 st.set_page_config(page_title="Construction Transactions", layout="wide")
 
@@ -30,12 +46,16 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------- READ CONFIG FROM SECRETS ----------
-try:
-    creds_dict = st.secrets["gcp_service_account"]
-    SPREADSHEET_ID = st.secrets["spreadsheet"]["id"]
-except Exception as e:
-    st.error("❌ Secrets not found. Please set up your .streamlit/secrets.toml file correctly.")
-    st.stop()
+import streamlit as st
+
+# Access secrets directly
+user_password = st.secrets["user_password"]
+admin_password = st.secrets["admin_password"]
+
+service_account = st.secrets["gcp_service_account"]
+project_id = service_account["project_id"]
+private_key = service_account["private_key"]
+
 
 # ---------- GOOGLE SHEET AUTH ----------
 creds = service_account.Credentials.from_service_account_info(creds_dict)
