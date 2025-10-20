@@ -216,15 +216,18 @@ st.markdown("""
 
     /* Buttons - Compact for mobile - FIT TO SCREEN */
     .stButton > button {
-        width: 100%;
+        width: 100% !important;
+        max-width: 100% !important;
         height: 40px !important;
-        font-size: 6px !important;
-        font-weight: 200;
-        margin: 1px 0 !important;
-        padding: 0 1px !important;
-        border-radius: 2px;
-        transition: all 0.1s ease;
+        font-size: 13px !important;
+        font-weight: 500;
+        margin: 2px 0 !important;
+        padding: 0 8px !important;
+        border-radius: 4px;
+        transition: all 0.2s ease;
         white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
         box-sizing: border-box !important;
     }
 
@@ -243,8 +246,8 @@ st.markdown("""
     }
 
     .stButton > button:hover {
-        transform: scale(0.7);
-        box-shadow: 0 1px 4px rgba(0, 0, 104, 0.3) !important;
+        transform: scale(0.98);
+        box-shadow: 0 2px 8px rgba(0, 0, 104, 0.3) !important;
     }
 
     /* Text inputs - Compact */
@@ -311,9 +314,11 @@ st.markdown("""
 
     /* Force columns to display side by side - FIT TO SCREEN */
     div[data-testid="column"] {
-        padding: 0px 1px !important;
-        flex: 1 1 0px !important;
+        padding: 0px 2px !important;
+        flex: 1 1 0 !important;
         min-width: 0 !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
     }
 
     /* Force horizontal block to never wrap - STAY WITHIN SCREEN */
@@ -321,26 +326,34 @@ st.markdown("""
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
-        gap: 2px !important;
-        width: 80% !important;
-        overflow: visible !important;
+        gap: 4px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
     }
 
     /* Ensure equal width columns - NO OVERFLOW */
     div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
-        flex: 1 !important;
+        flex: 1 1 0 !important;
         min-width: 0 !important;
+        max-width: 100% !important;
         width: auto !important;
+        box-sizing: border-box !important;
     }
 
     /* Prevent text inputs from being too wide */
     .stTextInput, .stNumberInput {
         width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
     }
 
-    /* Make buttons more compact */
+    /* Make buttons fit within their container */
     .stButton {
-        width: 80% !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
     }
 
     /* Main app container */
