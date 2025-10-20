@@ -212,14 +212,15 @@ st.markdown("""
     h2 { font-size: 18px !important; margin: 10px 0 5px 0 !important; }
     h3 { font-size: 16px !important; margin: 8px 0 !important; }
 
-    /* Buttons - Smaller for mobile */
+    /* Buttons - Much smaller for mobile */
     .stButton > button {
         width: 100%;
-        height: 50px !important;
-        font-size: 14px !important;
-        font-weight: bold;
-        margin: 2px 0 !important;
-        border-radius: 6px;
+        height: 38px !important;
+        font-size: 13px !important;
+        font-weight: 600;
+        margin: 3px 0 !important;
+        padding: 0 8px !important;
+        border-radius: 5px;
         transition: all 0.1s ease;
     }
 
