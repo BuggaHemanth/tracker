@@ -200,9 +200,10 @@ st.markdown("""
     .block-container {
         background-color: #ffffff;
         border-radius: 8px;
-        padding: 0.75rem !important;
-        max-width: 100% !important;
-        overflow-x: hidden !important;
+        padding: 0.5rem !important;
+        max-width: 100vw !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
 
     /* Headers */
@@ -217,15 +218,14 @@ st.markdown("""
     .stButton > button {
         width: 100%;
         height: 40px !important;
-        font-size: 13px !important;
+        font-size: 12px !important;
         font-weight: 600;
         margin: 2px 0 !important;
-        padding: 0 4px !important;
+        padding: 0 2px !important;
         border-radius: 5px;
         transition: all 0.1s ease;
         white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        box-sizing: border-box !important;
     }
 
     /* Primary buttons - Navy Blue RGB(0,0,104) */
@@ -311,10 +311,9 @@ st.markdown("""
 
     /* Force columns to display side by side - FIT TO SCREEN */
     div[data-testid="column"] {
-        padding: 0px 2px !important;
+        padding: 0px 1px !important;
         flex: 1 1 0px !important;
         min-width: 0 !important;
-        max-width: 50% !important;
     }
 
     /* Force horizontal block to never wrap - STAY WITHIN SCREEN */
@@ -322,23 +321,37 @@ st.markdown("""
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
-        gap: 4px !important;
+        gap: 2px !important;
         width: 100% !important;
-        max-width: 100% !important;
-        overflow: hidden !important;
+        overflow: visible !important;
     }
 
     /* Ensure equal width columns - NO OVERFLOW */
     div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
-        flex: 1 1 50% !important;
+        flex: 1 !important;
         min-width: 0 !important;
-        max-width: 50% !important;
-        overflow: hidden !important;
+        width: auto !important;
     }
 
     /* Prevent text inputs from being too wide */
     .stTextInput, .stNumberInput {
-        max-width: 100% !important;
+        width: 100% !important;
+    }
+
+    /* Make buttons more compact */
+    .stButton {
+        width: 100% !important;
+    }
+
+    /* Main app container */
+    .main {
+        max-width: 100vw !important;
+        overflow-x: hidden !important;
+    }
+
+    /* Ensure viewport constraint */
+    body {
+        overflow-x: hidden !important;
     }
 
     /* Success/Error messages */
