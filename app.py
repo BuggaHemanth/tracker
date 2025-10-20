@@ -284,21 +284,35 @@ st.markdown("""
     /* Metric cards - Compact */
     [data-testid="stMetric"] {
         background: #e6f2ff;
-        padding: 3px !important;
-        border-radius: 2px;
+        padding: 8px !important;
+        border-radius: 4px;
         border: 1px solid #99ccff;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
     }
 
     [data-testid="stMetricValue"] {
-        font-size: 8px !important;
+        font-size: 18px !important;
         font-weight: bold !important;
         color: rgb(0, 0, 104) !important;
     }
 
     [data-testid="stMetricLabel"] {
-        font-size: 8px !important;
+        font-size: 12px !important;
         color: rgb(0, 0, 104) !important;
-        font-weight: 200 !important;
+        font-weight: 600 !important;
+    }
+
+    @media (max-width: 768px) {
+        [data-testid="stMetric"] {
+            padding: 6px !important;
+        }
+        [data-testid="stMetricValue"] {
+            font-size: 16px !important;
+        }
+        [data-testid="stMetricLabel"] {
+            font-size: 11px !important;
+        }
     }
 
     /* Tabs */
