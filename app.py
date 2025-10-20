@@ -265,21 +265,21 @@ st.markdown("""
     /* Metric cards - Compact */
     [data-testid="stMetric"] {
         background: #e6f2ff;
-        padding: 2px !important;
-        border-radius: 2px;
+        padding: 10px !important;
+        border-radius: 8px;
         border: 2px solid #99ccff;
     }
 
     [data-testid="stMetricValue"] {
-        font-size: 15px !important;
+        font-size: 20px !important;
         font-weight: bold !important;
         color: rgb(0, 0, 104) !important;
     }
 
     [data-testid="stMetricLabel"] {
-        font-size: 8px !important;
+        font-size: 12px !important;
         color: rgb(0, 0, 104) !important;
-        font-weight: 500 !important;
+        font-weight: 600 !important;
     }
 
     /* Tabs */
@@ -515,49 +515,55 @@ else:
             with tab1:
                 st.header("New Entry")
 
-                # Type buttons FIRST - Hardcoded 2 columns (Paid and Received side by side)
-                col1, col2 = st.columns([1, 1])
-                with col1:
-                    btn_type = "primary" if st.session_state.transaction_type == "Paid" else "secondary"
-                    if st.button("PAID", use_container_width=True, type=btn_type, key="btn_paid"):
-                        st.session_state.transaction_type = "Paid"
-                        st.rerun()
-                with col2:
-                    btn_type = "primary" if st.session_state.transaction_type == "Received" else "secondary"
-                    if st.button("RECEIVED", use_container_width=True, type=btn_type, key="btn_received"):
-                        st.session_state.transaction_type = "Received"
-                        st.rerun()
+                # Type buttons FIRST - Hardcoded 2 columns (Paid and Received side by side) - HALF WIDTH
+                # Create centered container with max-width 50%
+                col_spacer1, col_center1, col_spacer2 = st.columns([1, 2, 1])
+                with col_center1:
+                    col1, col2 = st.columns([1, 1])
+                    with col1:
+                        btn_type = "primary" if st.session_state.transaction_type == "Paid" else "secondary"
+                        if st.button("PAID", use_container_width=True, type=btn_type, key="btn_paid"):
+                            st.session_state.transaction_type = "Paid"
+                            st.rerun()
+                    with col2:
+                        btn_type = "primary" if st.session_state.transaction_type == "Received" else "secondary"
+                        if st.button("RECEIVED", use_container_width=True, type=btn_type, key="btn_received"):
+                            st.session_state.transaction_type = "Received"
+                            st.rerun()
 
                 name = st.text_input("Name", value=st.session_state.name_input, placeholder="Enter person/vendor name", key="name_field")
                 amount = st.number_input("Amount (₹)", value=st.session_state.amount_input, min_value=0.0, step=10.0, format="%.0f", key="amount_field")
                 description = st.text_input("Description", value=st.session_state.description_input, placeholder="Add details...", key="desc_field")
 
-                # Payment Mode Buttons - Hardcoded 2x2 layout (2 rows, 2 columns) - NO TITLE
-                # Row 1: Online and GPay
-                col1, col2 = st.columns([1, 1])
-                with col1:
-                    btn_type = "primary" if st.session_state.payment_mode == "Online" else "secondary"
-                    if st.button("Online", use_container_width=True, type=btn_type, key="btn_online"):
-                        st.session_state.payment_mode = "Online"
-                        st.rerun()
-                with col2:
-                    btn_type = "primary" if st.session_state.payment_mode == "GPay" else "secondary"
-                    if st.button("GPay", use_container_width=True, type=btn_type, key="btn_gpay"):
-                        st.session_state.payment_mode = "GPay"
-                        st.rerun()
+                # Payment Mode Buttons - Hardcoded 2x2 layout - HALF WIDTH
+                # Create centered container with max-width 50%
+                col_spacer1, col_center2, col_spacer2 = st.columns([1, 2, 1])
+                with col_center2:
+                    # Row 1: Online and GPay
+                    col1, col2 = st.columns([1, 1])
+                    with col1:
+                        btn_type = "primary" if st.session_state.payment_mode == "Online" else "secondary"
+                        if st.button("Online", use_container_width=True, type=btn_type, key="btn_online"):
+                            st.session_state.payment_mode = "Online"
+                            st.rerun()
+                    with col2:
+                        btn_type = "primary" if st.session_state.payment_mode == "GPay" else "secondary"
+                        if st.button("GPay", use_container_width=True, type=btn_type, key="btn_gpay"):
+                            st.session_state.payment_mode = "GPay"
+                            st.rerun()
 
-                # Row 2: PhonePe and Cash
-                col3, col4 = st.columns([1, 1])
-                with col3:
-                    btn_type = "primary" if st.session_state.payment_mode == "PhonePe" else "secondary"
-                    if st.button("PhonePe", use_container_width=True, type=btn_type, key="btn_phone"):
-                        st.session_state.payment_mode = "PhonePe"
-                        st.rerun()
-                with col4:
-                    btn_type = "primary" if st.session_state.payment_mode == "Cash" else "secondary"
-                    if st.button("Cash", use_container_width=True, type=btn_type, key="btn_cash"):
-                        st.session_state.payment_mode = "Cash"
-                        st.rerun()
+                    # Row 2: PhonePe and Cash
+                    col3, col4 = st.columns([1, 1])
+                    with col3:
+                        btn_type = "primary" if st.session_state.payment_mode == "PhonePe" else "secondary"
+                        if st.button("PhonePe", use_container_width=True, type=btn_type, key="btn_phone"):
+                            st.session_state.payment_mode = "PhonePe"
+                            st.rerun()
+                    with col4:
+                        btn_type = "primary" if st.session_state.payment_mode == "Cash" else "secondary"
+                        if st.button("Cash", use_container_width=True, type=btn_type, key="btn_cash"):
+                            st.session_state.payment_mode = "Cash"
+                            st.rerun()
 
                 st.markdown("")  # spacing
 
