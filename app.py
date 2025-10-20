@@ -201,7 +201,7 @@ st.markdown("""
         background-color: #ffffff;
         border-radius: 8px;
         padding: 1rem !important;
-        max-width: 50% !important;
+        max-width: 100% !important;
     }
 
     /* Headers */
