@@ -215,12 +215,12 @@ st.markdown("""
     /* Buttons - Smaller for mobile */
     .stButton > button {
         width: 100%;
-        height: 45px !important;
-        font-size: 16px !important;
+        height: 50px !important;
+        font-size: 14px !important;
         font-weight: bold;
-        margin: 4px 0 !important;
-        border-radius: 8px;
-        transition: all 0.15s ease;
+        margin: 2px 0 !important;
+        border-radius: 6px;
+        transition: all 0.1s ease;
     }
 
     /* Primary buttons - Navy Blue RGB(0,0,104) */
@@ -306,7 +306,12 @@ st.markdown("""
 
     /* Column spacing - Tighter */
     div[data-testid="column"] {
-        padding: 2px !important;
+        padding: 0px 4px !important;
+    }
+
+    /* Force button columns to be equal width */
+    [data-testid="column"] > div {
+        width: 100% !important;
     }
 
     /* Success/Error messages */
@@ -468,11 +473,6 @@ else:
                 tab1, tab2 = st.tabs(["New Entry", "Download Statement"])
 
             with tab1:
-                # Show success message if transaction was just submitted
-                if st.session_state.show_success:
-                    st.success("Transaction submitted successfully!")
-                    st.session_state.show_success = False
-
                 st.header("New Entry")
 
                 name = st.text_input("Name", value=st.session_state.name_input, placeholder="Enter person/vendor name", key="name_field")
@@ -480,7 +480,8 @@ else:
                 description = st.text_input("Description", value=st.session_state.description_input, placeholder="Add details...", key="desc_field")
 
                 st.subheader("Type")
-                col1, col2 = st.columns(2)
+                # Hardcoded 2 columns for Type buttons
+                col1, col2 = st.columns([1, 1])
                 with col1:
                     btn_type = "primary" if st.session_state.transaction_type == "Paid" else "secondary"
                     if st.button("PAID", use_container_width=True, type=btn_type, key="btn_paid"):
@@ -492,32 +493,38 @@ else:
                         st.session_state.transaction_type = "Received"
                         st.rerun()
 
-                # Payment Mode Buttons - 2x2 layout
+                # Payment Mode Buttons - Hardcoded 2x2 layout (2 rows, 2 columns)
                 st.subheader("Payment Mode")
-                col1, col2 = st.columns(2)
+
+                # Row 1: Online and GPay
+                col1, col2 = st.columns([1, 1])
                 with col1:
                     btn_type = "primary" if st.session_state.payment_mode == "Online" else "secondary"
                     if st.button("Online", use_container_width=True, type=btn_type, key="btn_online"):
                         st.session_state.payment_mode = "Online"
                         st.rerun()
-
-                    btn_type = "primary" if st.session_state.payment_mode == "PhonePe" else "secondary"
-                    if st.button("PhonePe", use_container_width=True, type=btn_type, key="btn_phone"):
-                        st.session_state.payment_mode = "PhonePe"
-                        st.rerun()
-
                 with col2:
                     btn_type = "primary" if st.session_state.payment_mode == "GPay" else "secondary"
                     if st.button("GPay", use_container_width=True, type=btn_type, key="btn_gpay"):
                         st.session_state.payment_mode = "GPay"
                         st.rerun()
 
+                # Row 2: PhonePe and Cash
+                col3, col4 = st.columns([1, 1])
+                with col3:
+                    btn_type = "primary" if st.session_state.payment_mode == "PhonePe" else "secondary"
+                    if st.button("PhonePe", use_container_width=True, type=btn_type, key="btn_phone"):
+                        st.session_state.payment_mode = "PhonePe"
+                        st.rerun()
+                with col4:
                     btn_type = "primary" if st.session_state.payment_mode == "Cash" else "secondary"
                     if st.button("Cash", use_container_width=True, type=btn_type, key="btn_cash"):
                         st.session_state.payment_mode = "Cash"
                         st.rerun()
 
                 st.markdown("")  # spacing
+
+                # Submit button
                 if st.button("Submit Transaction", use_container_width=True, type="primary", key="btn_submit"):
                     if not name:
                         st.error("Please enter a name")
@@ -536,6 +543,11 @@ else:
                             st.session_state.amount_input = 0.0
                             st.session_state.description_input = ""
                             st.rerun()
+
+                # Show success message right after submit button
+                if st.session_state.show_success:
+                    st.success("Transaction submitted successfully!")
+                    st.session_state.show_success = False
 
             with tab2:
                 st.header("Download Statement")
