@@ -200,8 +200,9 @@ st.markdown("""
     .block-container {
         background-color: #ffffff;
         border-radius: 8px;
-        padding: 1rem !important;
+        padding: 0.75rem !important;
         max-width: 100% !important;
+        overflow-x: hidden !important;
     }
 
     /* Headers */
@@ -212,16 +213,19 @@ st.markdown("""
     h2 { font-size: 18px !important; margin: 10px 0 5px 0 !important; }
     h3 { font-size: 16px !important; margin: 8px 0 !important; }
 
-    /* Buttons - Compact for mobile */
+    /* Buttons - Compact for mobile - FIT TO SCREEN */
     .stButton > button {
         width: 100%;
-        height: 42px !important;
-        font-size: 14px !important;
+        height: 40px !important;
+        font-size: 13px !important;
         font-weight: 600;
-        margin: 3px 0 !important;
-        padding: 0 8px !important;
+        margin: 2px 0 !important;
+        padding: 0 4px !important;
         border-radius: 5px;
         transition: all 0.1s ease;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     /* Primary buttons - Navy Blue RGB(0,0,104) */
@@ -305,26 +309,36 @@ st.markdown("""
         border-radius: 6px !important;
     }
 
-    /* Force columns to display side by side - NO STACKING */
+    /* Force columns to display side by side - FIT TO SCREEN */
     div[data-testid="column"] {
-        padding: 0px 3px !important;
+        padding: 0px 2px !important;
         flex: 1 1 0px !important;
         min-width: 0 !important;
-        width: 50% !important;
+        max-width: 50% !important;
     }
 
-    /* Force horizontal block to never wrap */
+    /* Force horizontal block to never wrap - STAY WITHIN SCREEN */
     div[data-testid="stHorizontalBlock"] {
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
-        gap: 6px !important;
+        gap: 4px !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
     }
 
-    /* Ensure equal width columns */
+    /* Ensure equal width columns - NO OVERFLOW */
     div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
-        flex: 1 !important;
+        flex: 1 1 50% !important;
         min-width: 0 !important;
+        max-width: 50% !important;
+        overflow: hidden !important;
+    }
+
+    /* Prevent text inputs from being too wide */
+    .stTextInput, .stNumberInput {
+        max-width: 100% !important;
     }
 
     /* Success/Error messages */
