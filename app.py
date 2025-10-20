@@ -195,6 +195,7 @@ st.markdown("""
     /* Main background - Navy Blue RGB(0,0,104) */
     .stApp {
         background: rgb(0, 0, 104);
+        overflow-x: hidden !important;
     }
 
     /* Content area - MOBILE WIDTH SIMULATION */
@@ -206,6 +207,7 @@ st.markdown("""
         width: 100% !important;
         margin: 0 auto !important;
         box-sizing: border-box !important;
+        overflow-x: hidden !important;
     }
 
     /* Main container - center the mobile view */
@@ -215,10 +217,13 @@ st.markdown("""
         margin: 0 auto !important;
         overflow-x: hidden !important;
         padding: 0 !important;
+        box-sizing: border-box !important;
     }
 
     .main > div {
         max-width: 420px !important;
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
     }
 
     /* Headers */
@@ -231,20 +236,20 @@ st.markdown("""
 
     /* Buttons - Compact for mobile - FIT TO SCREEN */
     .stButton > button {
-        width: auto !important;
-        max-width: 100% !important;
+        width: 95% !important;
+        max-width: 95% !important;
         height: 36px !important;
         font-size: 11px !important;
         font-weight: 500;
         margin: 2px auto !important;
-        padding: 6px 10px !important;
+        padding: 4px 6px !important;
         border-radius: 4px;
         transition: all 0.2s ease;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
         box-sizing: border-box !important;
-        display: inline-block !important;
+        display: block !important;
     }
 
     /* Primary buttons - Navy Blue RGB(0,0,104) */
@@ -337,6 +342,7 @@ st.markdown("""
         min-width: 0 !important;
         max-width: 50% !important;
         box-sizing: border-box !important;
+        overflow: hidden !important;
     }
 
     /* Force horizontal block to never wrap - STAY WITHIN SCREEN */
@@ -347,9 +353,10 @@ st.markdown("""
         gap: 4px !important;
         width: 100% !important;
         max-width: 100% !important;
-        overflow: visible !important;
+        overflow: hidden !important;
         box-sizing: border-box !important;
         margin: 0 !important;
+        padding: 0 !important;
     }
 
     /* Ensure equal width columns - NO OVERFLOW */
@@ -359,6 +366,7 @@ st.markdown("""
         max-width: 50% !important;
         width: 50% !important;
         box-sizing: border-box !important;
+        overflow: hidden !important;
     }
 
     /* Prevent text inputs from being too wide */
@@ -370,21 +378,33 @@ st.markdown("""
 
     /* Make buttons fit within their container */
     .stButton {
-        width: auto !important;
+        width: 100% !important;
         max-width: 100% !important;
         box-sizing: border-box !important;
         text-align: center !important;
-        display: flex !important;
-        justify-content: center !important;
+        display: block !important;
+        overflow: hidden !important;
     }
 
     /* Ensure viewport constraint */
     body {
         overflow-x: hidden !important;
+        max-width: 100vw !important;
     }
 
     html {
         overflow-x: hidden !important;
+        max-width: 100vw !important;
+    }
+
+    /* Force all elements to respect container width */
+    * {
+        max-width: 100% !important;
+    }
+
+    /* Exception for the app background */
+    .stApp, body, html {
+        max-width: 100vw !important;
     }
 
     /* Success/Error messages */
