@@ -191,26 +191,34 @@ def create_pdf_statement(df, start_date, end_date, username, is_admin):
 # Navy Blue Theme CSS - RGB(0,0,104) - Mobile Optimized
 st.markdown("""
     <style>
+    /* FORCE MOBILE VIEW ON ALL DEVICES FOR TESTING */
     /* Main background - Navy Blue RGB(0,0,104) */
     .stApp {
         background: rgb(0, 0, 104);
     }
 
-    /* Content area */
+    /* Content area - MOBILE WIDTH SIMULATION */
     .block-container {
         background-color: #ffffff;
         border-radius: 8px;
-        padding: 1rem 0.5rem !important;
-        max-width: 100vw !important;
+        padding: 0.75rem 0.25rem !important;
+        max-width: 420px !important;
         width: 100% !important;
         margin: 0 auto !important;
         box-sizing: border-box !important;
     }
 
-    @media (max-width: 768px) {
-        .block-container {
-            padding: 0.75rem 0.25rem !important;
-        }
+    /* Main container - center the mobile view */
+    .main {
+        max-width: 420px !important;
+        width: 100% !important;
+        margin: 0 auto !important;
+        overflow-x: hidden !important;
+        padding: 0 !important;
+    }
+
+    .main > div {
+        max-width: 420px !important;
     }
 
     /* Headers */
@@ -225,11 +233,11 @@ st.markdown("""
     .stButton > button {
         width: auto !important;
         max-width: 100% !important;
-        height: 40px !important;
-        font-size: 14px !important;
+        height: 36px !important;
+        font-size: 11px !important;
         font-weight: 500;
         margin: 2px auto !important;
-        padding: 8px 16px !important;
+        padding: 6px 10px !important;
         border-radius: 4px;
         transition: all 0.2s ease;
         white-space: nowrap;
@@ -237,14 +245,6 @@ st.markdown("""
         text-overflow: ellipsis;
         box-sizing: border-box !important;
         display: inline-block !important;
-    }
-
-    @media (max-width: 768px) {
-        .stButton > button {
-            font-size: 11px !important;
-            padding: 6px 10px !important;
-            height: 36px !important;
-        }
     }
 
     /* Primary buttons - Navy Blue RGB(0,0,104) */
@@ -284,7 +284,7 @@ st.markdown("""
     /* Metric cards - Compact */
     [data-testid="stMetric"] {
         background: #e6f2ff;
-        padding: 8px !important;
+        padding: 6px !important;
         border-radius: 4px;
         border: 1px solid #99ccff;
         max-width: 100% !important;
@@ -292,27 +292,15 @@ st.markdown("""
     }
 
     [data-testid="stMetricValue"] {
-        font-size: 18px !important;
+        font-size: 16px !important;
         font-weight: bold !important;
         color: rgb(0, 0, 104) !important;
     }
 
     [data-testid="stMetricLabel"] {
-        font-size: 12px !important;
+        font-size: 11px !important;
         color: rgb(0, 0, 104) !important;
         font-weight: 600 !important;
-    }
-
-    @media (max-width: 768px) {
-        [data-testid="stMetric"] {
-            padding: 6px !important;
-        }
-        [data-testid="stMetricValue"] {
-            font-size: 16px !important;
-        }
-        [data-testid="stMetricLabel"] {
-            font-size: 11px !important;
-        }
     }
 
     /* Tabs */
@@ -344,17 +332,11 @@ st.markdown("""
 
     /* Force columns to display side by side - FIT TO SCREEN */
     div[data-testid="column"] {
-        padding: 0px 3px !important;
+        padding: 0px 2px !important;
         flex: 1 1 0 !important;
         min-width: 0 !important;
         max-width: 50% !important;
         box-sizing: border-box !important;
-    }
-
-    @media (max-width: 768px) {
-        div[data-testid="column"] {
-            padding: 0px 2px !important;
-        }
     }
 
     /* Force horizontal block to never wrap - STAY WITHIN SCREEN */
@@ -362,18 +344,12 @@ st.markdown("""
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
-        gap: 6px !important;
+        gap: 4px !important;
         width: 100% !important;
         max-width: 100% !important;
         overflow: visible !important;
         box-sizing: border-box !important;
         margin: 0 !important;
-    }
-
-    @media (max-width: 768px) {
-        div[data-testid="stHorizontalBlock"] {
-            gap: 4px !important;
-        }
     }
 
     /* Ensure equal width columns - NO OVERFLOW */
@@ -383,13 +359,6 @@ st.markdown("""
         max-width: 50% !important;
         width: 50% !important;
         box-sizing: border-box !important;
-    }
-
-    @media (max-width: 768px) {
-        div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
-            max-width: 50% !important;
-            width: 50% !important;
-        }
     }
 
     /* Prevent text inputs from being too wide */
@@ -409,27 +378,13 @@ st.markdown("""
         justify-content: center !important;
     }
 
-    /* Main app container */
-    .main {
-        max-width: 100vw !important;
-        width: 100vw !important;
-        overflow-x: hidden !important;
-        padding: 0 !important;
-    }
-
-    .main > div {
-        max-width: 100% !important;
-    }
-
     /* Ensure viewport constraint */
     body {
         overflow-x: hidden !important;
-        max-width: 100vw !important;
     }
 
     html {
         overflow-x: hidden !important;
-        max-width: 100vw !important;
     }
 
     /* Success/Error messages */
