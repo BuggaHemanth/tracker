@@ -695,7 +695,8 @@ Segment Performance:
 Keep tone professional and direct. No conversational language. Use consistent plain text only.
     """
     try:
-        return llm.invoke(prompt)
+        response = llm.invoke(prompt)
+        return response.content
     except Exception as e:
         return f"Error generating summary: {e}"
 
