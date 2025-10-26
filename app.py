@@ -1,1333 +1,636 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-import os
 import streamlit as st
+import gspread
+from google.oauth2.service_account import Credentials
+from datetime import datetime, timedelta
 import pandas as pd
-import plotly.express as px
-from fpdf import FPDF
-from langchain_google_genai import ChatGoogleGenerativeAI
-import json
-from datetime import datetime
-from dotenv import load_dotenv
+from reportlab.lib.pagesizes import letter, A4
+from reportlab.lib import colors
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.units import inch
+from io import BytesIO
 
-# Load environment variables
-load_dotenv()
-
-# Google Sheets imports
-try:
-    import gspread
-    from oauth2client.service_account import ServiceAccountCredentials
-    GOOGLE_SHEETS_AVAILABLE = True
-except ImportError:
-    GOOGLE_SHEETS_AVAILABLE = False
-
-# -----------------------------
-# CONFIG & LOAD DATA
-# -----------------------------
+# Page configuration
 st.set_page_config(
-    page_title="AI Maturity Assessment",
-    layout="wide",
-    initial_sidebar_state="expanded"
+    page_title="Construction Site",
+    page_icon="🏗️",
+    layout="centered",
+    initial_sidebar_state="collapsed"
 )
 
-# Apply custom CSS for navy blue theme
-st.markdown("""
-<style>
-    /* Navy blue theme */
-    .stApp {
-        background-color: #f8f9fa;
-    }
-    .main .block-container {
-        padding-top: 0 !important;
-        padding-bottom: 0 !important;
-        margin-top: 0 !important;
-        max-width: 100%;
-    }
+# Google Sheets setup
+SCOPES = [
+    'https://www.googleapis.com/auth/spreadsheets',
+    'https://www.googleapis.com/auth/drive'
+]
 
-    /* Remove all empty space */
-    div[data-testid="stVerticalBlock"] {
-        gap: 0 !important;
-    }
+SPREADSHEET_ID = "10H_Er872srJihxthzQJEUy7RwG6NS5q54G-Ex9VPOnI"
 
-    div[data-testid="stVerticalBlock"] > div {
-        padding-top: 0 !important;
-        padding-bottom: 0 !important;
-    }
-
-    /* Reduce title font size and spacing */
-    h1 {
-        color: #001f3f;
-        font-size: 1.8rem !important;
-        margin-top: 0 !important;
-        padding-top: 0 !important;
-        margin-bottom: 0.5rem !important;
-    }
-    h2 {
-        color: #001f3f;
-        font-size: 1.4rem !important;
-        margin-top: 0.5rem !important;
-        margin-bottom: 0.5rem !important;
-    }
-    h3 {
-        color: #001f3f;
-        font-size: 1.2rem !important;
-        margin-top: 0.5rem !important;
-        margin-bottom: 0.5rem !important;
-    }
-
-    /* Increase question font size and reduce gap */
-    .stMarkdown p {
-        font-size: 1.1rem !important;
-        line-height: 1.4 !important;
-    }
-
-    /* Simple radio buttons - NO BOXES, NO SHADOWS, LEFT ALIGNED */
-    .stRadio > div {
-        gap: 0.2rem !important;
-        display: flex !important;
-        flex-direction: column !important;
-        align-items: flex-start !important;
-    }
-    .stRadio > div > label {
-        background-color: transparent !important;
-        padding: 4px 0px !important;
-        padding-left: 0 !important;
-        border-radius: 0 !important;
-        border: none !important;
-        margin-bottom: 0.15rem !important;
-        cursor: pointer !important;
-        display: flex !important;
-        align-items: center !important;
-        gap: 10px !important;
-        box-shadow: none !important;
-        -webkit-box-shadow: none !important;
-        -moz-box-shadow: none !important;
-        justify-content: flex-start !important;
-        width: 100% !important;
-    }
-    .stRadio > div > label > div[data-testid="stMarkdownContainer"] {
-        flex: 1 !important;
-        text-align: left !important;
-    }
-    .stRadio > div > label > div[data-testid="stMarkdownContainer"] > p {
-        color: #001f3f !important;
-        font-size: 1.05rem !important;
-        font-weight: 400 !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        text-align: left !important;
-    }
-    /* Selected radio button - make text bold and navy blue, NO SHADOWS */
-    .stRadio > div > label:has(input[type="radio"]:checked) {
-        background-color: transparent !important;
-        border: none !important;
-        outline: none !important;
-        box-shadow: none !important;
-        -webkit-box-shadow: none !important;
-        -moz-box-shadow: none !important;
-    }
-    .stRadio > div > label:has(input[type="radio"]:checked) p {
-        color: #001f3f !important;
-        font-weight: 400 !important;
-    }
-    /* Radio button circle - navy blue, NO SHADOWS */
-    input[type="radio"] {
-        accent-color: #001f3f !important;
-        outline: none !important;
-        width: 18px !important;
-        height: 18px !important;
-        cursor: pointer !important;
-        flex-shrink: 0 !important;
-        box-shadow: none !important;
-        -webkit-box-shadow: none !important;
-        -moz-box-shadow: none !important;
-    }
-    input[type="radio"]:checked {
-        accent-color: #001f3f !important;
-        outline: none !important;
-        box-shadow: none !important;
-        -webkit-box-shadow: none !important;
-        -moz-box-shadow: none !important;
-    }
-    /* FORCE REMOVE ALL FOCUS OUTLINES, BOXES, AND SHADOWS - EVERYWHERE */
-    .stRadio > div > label:focus,
-    .stRadio > div > label:focus-within,
-    .stRadio > div > label:active,
-    input[type="radio"]:focus,
-    input[type="radio"]:focus-visible,
-    input[type="radio"]:active,
-    *:focus,
-    *:focus-visible {
-        outline: none !important;
-        outline-width: 0 !important;
-        outline-style: none !important;
-        outline-color: transparent !important;
-        box-shadow: none !important;
-        -webkit-box-shadow: none !important;
-        -moz-box-shadow: none !important;
-        border: none !important;
-    }
-    /* Hover state - subtle highlight, no box, NO SHADOWS */
-    .stRadio > div > label:hover {
-        background-color: rgba(0, 31, 63, 0.05) !important;
-        border: none !important;
-        outline: none !important;
-        box-shadow: none !important;
-        -webkit-box-shadow: none !important;
-        -moz-box-shadow: none !important;
-        border-radius: 4px !important;
-    }
-
-    /* Text input focus - blue */
-    .stTextInput > div > div > input:focus {
-        border-color: #001f3f !important;
-        box-shadow: 0 0 0 1px #001f3f !important;
-    }
-
-    /* All Buttons - Navy Blue - FORCE ALL BUTTONS */
-    button, .stButton>button, .stDownloadButton>button, .stFormSubmitButton>button {
-        background-color: #001f3f !important;
-        color: white !important;
-        border: none !important;
-        border-color: #001f3f !important;
-    }
-    button:hover, .stButton>button:hover, .stDownloadButton>button:hover, .stFormSubmitButton>button:hover {
-        background-color: #003d7a !important;
-        border-color: #003d7a !important;
-        color: white !important;
-    }
-    button[kind="primary"], button[kind="secondary"], button[kind="primaryFormSubmit"], button[kind="secondaryFormSubmit"] {
-        background-color: #001f3f !important;
-        color: white !important;
-        border: none !important;
-    }
-    button[kind="primary"]:hover, button[kind="secondary"]:hover, button[kind="primaryFormSubmit"]:hover, button[kind="secondaryFormSubmit"]:hover {
-        background-color: #003d7a !important;
-        color: white !important;
-    }
-    /* Force all submit buttons */
-    input[type="submit"], button[type="submit"] {
-        background-color: #001f3f !important;
-        color: white !important;
-    }
-
-    /* Sidebar */
-    [data-testid="stSidebar"] {
-        background-color: #001f3f;
-        padding-top: 1rem;
-    }
-    /* Sidebar navigation buttons - Simple, no background highlighting */
-    [data-testid="stSidebar"] .stButton>button {
-        background-color: transparent !important;
-        border: none !important;
-        color: white !important;
-        font-weight: 400 !important;
-        text-align: left !important;
-    }
-    [data-testid="stSidebar"] * {
-        color: white !important;
-    }
-    /* CURRENT SECTION - Bold text with white border */
-    section[data-testid="stSidebar"] button[data-testid="baseButton-primary"],
-    section[data-testid="stSidebar"] button[data-testid="baseButton-primary"] *,
-    [data-testid="stSidebar"] .stButton>button[kind="primary"],
-    [data-testid="stSidebar"] .stButton>button[kind="primary"] *,
-    [data-testid="stSidebar"] button[kind="primary"],
-    [data-testid="stSidebar"] button[kind="primary"] * {
-        background-color: transparent !important;
-        color: white !important;
-        font-weight: 700 !important;
-    }
-    [data-testid="stSidebar"] .stButton>button[kind="primary"],
-    [data-testid="stSidebar"] button[kind="primary"] {
-        border: 2px solid white !important;
-        border-radius: 4px !important;
-    }
-    /* OTHER SECTIONS - Normal text, no border */
-    [data-testid="stSidebar"] .stButton>button[kind="secondary"],
-    [data-testid="stSidebar"] .stButton>button[kind="secondary"] * {
-        background-color: transparent !important;
-        color: white !important;
-        font-weight: 400 !important;
-        border: none !important;
-    }
-    /* Hover - subtle background */
-    [data-testid="stSidebar"] .stButton>button:hover {
-        background-color: rgba(255, 255, 255, 0.1) !important;
-        border-radius: 4px !important;
-    }
-
-    /* Sidebar logo */
-    .sidebar-logo {
-        text-align: center;
-        padding: 10px;
-        margin-bottom: 20px;
-        background-color: white;
-        border-radius: 8px;
-        margin: 0 10px 20px 10px;
-    }
-    .sidebar-logo img {
-        width: 100%;
-        max-width: 200px;
-        height: auto;
-    }
-
-    /* Hide horizontal rules - just use spacing between questions */
-    hr {
-        margin-top: 2rem !important;
-        margin-bottom: 0.5rem !important;
-        border: none !important;
-        visibility: hidden !important;
-        height: 0 !important;
-    }
-
-    /* Remove borders from forms and questionnaire */
-    [data-testid="stForm"] {
-        border: none !important;
-        padding: 0 !important;
-    }
-    .stForm {
-        border: none !important;
-    }
-    form {
-        border: none !important;
-    }
-
-    /* Hide Streamlit header and footer */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-
-    /* Large centered loading spinner - FORCE CENTER */
-    div[data-testid="stSpinner"] {
-        position: fixed !important;
-        top: 0 !important;
-        left: 0 !important;
-        width: 100vw !important;
-        height: 100vh !important;
-        background-color: rgba(255, 255, 255, 0.95) !important;
-        z-index: 9999 !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
-    }
-
-    div[data-testid="stSpinner"] > div {
-        position: relative !important;
-        top: auto !important;
-        left: auto !important;
-        transform: none !important;
-    }
-
-    /* Make spinner much larger */
-    div[data-testid="stSpinner"] > div > div,
-    div[data-testid="stSpinner"] svg,
-    div[data-testid="stSpinner"] circle {
-        width: 120px !important;
-        height: 120px !important;
-    }
-
-    div[data-testid="stSpinner"] circle {
-        stroke-width: 6 !important;
-        stroke: #001f3f !important;
-    }
-</style>
-""", unsafe_allow_html=True)
-
-# Helper function to safely get secrets
-def get_secret(key, default=None):
-    """Safely get secret from environment or Streamlit secrets"""
-    # Try environment variable first
-    value = os.environ.get(key)
-    if value:
-        return value
-
-    # Try Streamlit secrets
+@st.cache_resource
+def get_google_sheet():
+    """Connect to Google Sheets"""
     try:
-        return st.secrets[key]
-    except (KeyError, FileNotFoundError):
-        return default
-
-# Initialize Gemini LLM
-try:
-    gemini_key = get_secret("GEMINI_API_KEY")
-    if not gemini_key:
-        st.error("⚠️ GEMINI_API_KEY not found. Please configure it in Streamlit Cloud Secrets.")
-        st.stop()
-
-    llm = ChatGoogleGenerativeAI(
-        model="gemini-2.0-flash",
-        temperature=0.0,
-        google_api_key=gemini_key
-    )
-except Exception as e:
-    st.error(f"⚠️ Error initializing Gemini: {str(e)}")
-    st.stop()
-
-# Google Sheets Configuration - Load from environment or secrets
-SHEET_ID = get_secret("GOOGLE_SHEET_ID")
-if not SHEET_ID:
-    st.error("⚠️ GOOGLE_SHEET_ID not found. Please configure it in Streamlit Cloud Secrets.")
-    st.stop()
-
-# Load questions from Google Sheets - Cache for entire session
-@st.cache_data(ttl=3600)
-def load_questions_from_sheets():
-    """Load questions from Google Sheets Raw tab - Cache for 1 hour for better performance"""
-    try:
-        scope = ['https://spreadsheets.google.com/feeds',
-                 'https://www.googleapis.com/auth/drive']
-
-        # Try to get credentials
-        creds_json = os.environ.get('GOOGLE_SHEETS_CREDENTIALS')
-        if creds_json:
-            creds_dict = json.loads(creds_json)
-        else:
-            try:
-                creds_dict = dict(st.secrets['google_sheets_creds'])
-            except KeyError:
-                st.error("⚠️ Google Sheets credentials not found. Please configure 'google_sheets_creds' in Streamlit Cloud Secrets.")
-                st.info("📖 Check DEPLOYMENT_GUIDE.md for instructions on how to set up secrets.")
-                st.stop()
-
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+        creds = Credentials.from_service_account_info(
+            st.secrets["gcp_service_account"],
+            scopes=SCOPES
+        )
         client = gspread.authorize(creds)
-        sheet = client.open_by_key(SHEET_ID).worksheet('Raw')
-        data = sheet.get_all_records()
-        df = pd.DataFrame(data)
-
-        if 'Segment' in df.columns:
-            df['Segment'] = df['Segment'].replace('', pd.NA).ffill()
-        if 'Weightage' in df.columns:
-            df['Weightage'] = df['Weightage'].replace('', pd.NA).ffill()
-
-        return df
+        spreadsheet = client.open_by_key(SPREADSHEET_ID)
+        return spreadsheet
     except Exception as e:
-        st.error(f"⚠️ Error loading questions from Google Sheets: {str(e)}")
-        st.info("💡 Make sure:\n- Google Sheets API is enabled\n- Service account has access to the sheet\n- Sheet ID is correct")
-        # Return empty dataframe to prevent crash
-        return pd.DataFrame()
-
-# Load questions - cached for performance
-df = load_questions_from_sheets()
-
-# Check if questions loaded successfully
-if df.empty:
-    st.error("⚠️ No questions loaded from Google Sheets. Please check your configuration.")
-    st.stop()
-
-# [Include all the function definitions from the previous file here - calculate_score_for_answer, calculate_segment_scores, get_tag, generate_summary, generate_pdf, save_to_google_sheets_responses]
-
-# Copy functions from previous file
-def calculate_score_for_answer(answer, options_str):
-    """Calculate score based on answer position"""
-    answer = str(answer).strip()
-    answer_lower = answer.lower()
-
-    # Skip empty answers
-    if not answer:
+        st.error(f"Error connecting to Google Sheets: {e}")
         return None
 
-    # Check if this is a "1 to 5 Rating" question
-    is_rating_question = "1 to 5 Rating" in str(options_str) if pd.notna(options_str) else False
-
-    # For rating questions, handle specially
-    if is_rating_question:
-        try:
-            rating_value = int(answer)
-            # 1 = 0.0, 2 = 0.25, 3 = 0.5, 4 = 0.75, 5 = 1.0
-            score = (rating_value - 1) / 4.0
-            return score
-        except ValueError:
-            return None
-
-    # Parse options for other question types
-    if pd.notna(options_str):
-        if '\n' in str(options_str):
-            options = [opt.strip().lstrip('*').strip() for opt in str(options_str).split('\n') if opt.strip()]
-        elif '/' in str(options_str):
-            options_clean = str(options_str).strip('()').strip()
-            options = [opt.strip() for opt in options_clean.split('/') if opt.strip()]
-        else:
-            options = [answer]
-    else:
-        options = [answer]
-
-    # Check if this is a Yes/No question (binary)
-    options_lower = [opt.lower() for opt in options]
-    if 'yes' in options_lower and 'no' in options_lower and len(options) == 2:
-        # Special handling for Yes/No questions
-        if answer_lower == 'yes':
-            return 1.0
-        elif answer_lower == 'no':
-            return 0.0
-        else:
-            return None
-
-    # For other questions, use standard logic (first option = best)
-    if not options:
+def get_transactions_sheet(spreadsheet):
+    """Get transactions sheet"""
+    try:
+        return spreadsheet.sheet1
+    except Exception as e:
+        st.error(f"Error getting transactions sheet: {e}")
         return None
 
+def get_credentials_sheet(spreadsheet):
+    """Get or create credentials sheet"""
     try:
-        answer_index = options.index(answer)
-    except ValueError:
         try:
-            options_lower_list = [opt.lower() for opt in options]
-            answer_index = options_lower_list.index(answer_lower)
-        except ValueError:
-            return None
-
-    num_options = len(options)
-    if num_options == 1:
-        score = 1.0
-    else:
-        score = 1.0 - (answer_index / (num_options - 1))
-
-    return score
-
-def save_to_google_sheets_responses(user_data, all_responses, sheet_id, df, overall_score, segment_scores=None):
-    """Save responses to Google Sheets - Responses tab and Calculations tab"""
-    try:
-        scope = ['https://spreadsheets.google.com/feeds', 'https://www.googleapis.com/auth/drive']
-        creds_json = os.environ.get('GOOGLE_SHEETS_CREDENTIALS')
-        if creds_json:
-            creds_dict = json.loads(creds_json)
-        else:
-            creds_dict = dict(st.secrets['google_sheets_creds'])
-
-        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
-        client = gspread.authorize(creds)
-        spreadsheet = client.open_by_key(sheet_id)
-
-        # ===== RESPONSES TAB =====
-        try:
-            responses_sheet = spreadsheet.worksheet('Responses')
+            sheet = spreadsheet.worksheet("credentials")
         except:
-            responses_sheet = spreadsheet.add_worksheet(title='Responses', rows=1000, cols=100)
+            sheet = spreadsheet.add_worksheet(title="credentials", rows="100", cols="5")
+            sheet.append_row(["Username", "Password", "Phone", "Name", "Role"])
+            sheet.append_row(["admin", "admin123", "0000000000", "Admin", "admin"])
+        return sheet
+    except Exception as e:
+        st.error(f"Error with credentials sheet: {e}")
+        return None
 
-        row = [
-            datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            user_data['name'],
-            user_data['email'],
-            user_data['phone'],
-            user_data['organization']
-        ]
+def authenticate_user(cred_sheet, username, password):
+    """Authenticate user against credentials sheet"""
+    try:
+        data = cred_sheet.get_all_records()
+        for row in data:
+            if row['Username'].lower() == username.lower() and row['Password'] == password:
+                return True, row['Role'], row['Name']
+        return False, None, None
+    except Exception as e:
+        st.error(f"Authentication error: {e}")
+        return False, None, None
 
-        for key, value in all_responses.items():
-            answer = value['answer']
-            question_row = df[df['Question'] == value['question']]
-            if not question_row.empty:
-                options_str = question_row['Options'].iloc[0]
-                score = calculate_score_for_answer(answer, options_str)
-                if score is not None:
-                    answer_with_score = f"{answer} ({score:.2f})"
-                else:
-                    answer_with_score = f"{answer} (N/A)"
-            else:
-                answer_with_score = answer
-            row.append(answer_with_score)
+def create_user_account(cred_sheet, username, password, phone, name):
+    """Create new user account"""
+    try:
+        data = cred_sheet.get_all_records()
+        for row in data:
+            if row['Username'].lower() == username.lower():
+                return False, "Username already exists"
+        cred_sheet.append_row([username, password, phone, name, "user"])
+        return True, "Account created successfully"
+    except Exception as e:
+        return False, f"Error creating account: {e}"
 
-        # Add overall score (0-100 scale) - NO segment scores in Responses tab
-        overall_score_100 = round(overall_score * 100)
-        row.append(f"{overall_score_100}")
-
-        if responses_sheet.row_count == 0 or not responses_sheet.row_values(1):
-            header = ['Timestamp', 'Name', 'Email', 'Phone', 'Organization']
-            for key, value in all_responses.items():
-                header.append(value['question'])
-            header.append('Overall Score (0-100)')
-            responses_sheet.append_row(header)
-
-        responses_sheet.append_row(row)
-
-        # ===== CALCULATIONS TAB =====
-        if segment_scores:
-            try:
-                calc_sheet = spreadsheet.worksheet('Calculations')
-            except:
-                calc_sheet = spreadsheet.add_worksheet(title='Calculations', rows=1000, cols=20)
-
-            # Build detailed calculation rows
-            calc_rows = []
-
-            # Header row
-            calc_rows.append([
-                'Timestamp',
-                'Name',
-                'Organization',
-                'Segment',
-                'Total Questions in Segment',
-                'Total Score (Sum)',
-                'Average Score (0-1)',
-                'Segment Weightage',
-                'Weighted Score',
-                'Segment Score (0-100)',
-                'Overall Score (0-100)'
-            ])
-
-            timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-            # One row per segment with calculations
-            for segment_name in sorted(segment_scores.keys()):
-                seg_data = segment_scores[segment_name]
-                calc_rows.append([
-                    timestamp,
-                    user_data['name'],
-                    user_data['organization'],
-                    segment_name,
-                    seg_data['total_questions'],
-                    f"{seg_data['score'] * seg_data['total_questions']:.2f}",  # Total score sum
-                    f"{seg_data['score']:.4f}",  # Average score (0-1)
-                    f"{seg_data['weightage']:.2%}",  # Weightage as percentage
-                    f"{seg_data['weighted_score']:.4f}",  # Weighted score
-                    f"{round(seg_data['score'] * 100)}",  # Segment score 0-100
-                    ""  # Overall score only on first row
-                ])
-
-            # Add overall score to the first segment row
-            if calc_rows and len(calc_rows) > 1:
-                calc_rows[1][10] = f"{overall_score_100}"
-
-            # Write to Calculations sheet
-            if calc_sheet.row_count == 0 or not calc_sheet.row_values(1):
-                calc_sheet.append_row(calc_rows[0])  # Header
-                for row in calc_rows[1:]:
-                    calc_sheet.append_row(row)
-            else:
-                for row in calc_rows[1:]:
-                    calc_sheet.append_row(row)
-
+def add_transaction(sheet, name, description, amount, transaction_type, payment_mode, username):
+    """Add a transaction to Google Sheets"""
+    try:
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        row = [timestamp, username, name, description, amount, transaction_type, payment_mode]
+        sheet.append_row(row)
         return True
     except Exception as e:
-        # Log error for debugging but return False silently
-        print(f"Error saving to Google Sheets: {e}")
+        st.error(f"Error adding transaction: {e}")
         return False
 
-def calculate_segment_scores(all_responses, df):
-    """Calculate weighted scores"""
-    segments_list = df['Segment'].unique().tolist()
-    segment_scores = {}
-
-    for segment in segments_list:
-        segment_responses = {k: v for k, v in all_responses.items() if v['segment'] == segment}
-        if not segment_responses:
-            continue
-
-        weightage_str = str(df[df['Segment'] == segment]['Weightage'].iloc[0])
-        if '%' in weightage_str:
-            segment_weightage = float(weightage_str.strip('%')) / 100
-        else:
-            segment_weightage = float(weightage_str)
-
-        total_score = 0
-        question_count = 0
-
-        for resp_data in segment_responses.values():
-            answer = resp_data['answer']
-            question_row = df[df['Question'] == resp_data['question']]
-            if not question_row.empty:
-                options = question_row['Options'].iloc[0]
-                score = calculate_score_for_answer(answer, options)
-                if score is not None:
-                    total_score += score
-                    question_count += 1
-
-        avg_score = total_score / question_count if question_count > 0 else 0
-        segment_scores[segment] = {
-            'score': avg_score,
-            'weightage': segment_weightage,
-            'weighted_score': avg_score * segment_weightage,
-            'total_questions': question_count
-        }
-
-    return segment_scores
-
-def get_tag(score):
-    """Get maturity tag based on score (0-1 scale)"""
-    if score < 0.25:
-        return "Novice"
-    elif score < 0.5:
-        return "Explorer"
-    elif score < 0.75:
-        return "PaceSetter"
-    else:
-        return "Trailblazer"
-
-def generate_summary(segment_scores, overall_score, overall_tag):
-    prompt = f"""
-You are an AI maturity assessment expert. Generate a professional assessment report.
-
-STRICT FORMATTING RULES:
-- DO NOT include conversational phrases like "Okay, here's", "Here is", "Let me", etc.
-- DO NOT use bold (**text**), italics, or any markdown formatting
-- DO NOT use asterisks (*) anywhere - use hyphens (-) for bullets only
-- Keep consistent plain text formatting throughout
-- Start directly with section 1
-
-Generate exactly 4 sections with this structure:
-
-1. Executive Summary:
-[Write 3 sentences in a single paragraph about the organization's AI maturity]
-
-2. Key Strengths:
-- [Strength 1]
-- [Strength 2]
-- [Strength 3]
-- [Strength 4]
-
-3. Improvement Opportunities:
-- [Improvement 1]
-- [Improvement 2]
-{"- [Improvement 3]" if overall_score <= 0.8 else ""}
-
-4. Recommended Next Steps:
-- [Step 1]
-- [Step 2]
-{"- [Step 3]" if overall_score <= 0.8 else ""}
-
-Assessment Data:
-Overall Score: {round(overall_score * 100)}/100 ({overall_tag})
-
-Segment Performance:
-{chr(10).join([f"- {seg}: {round(data['score'] * 100)}/100 ({get_tag(data['score'])})" for seg, data in sorted(segment_scores.items())])}
-
-Keep tone professional and direct. No conversational language. Use consistent plain text only.
-    """
+def get_transactions(sheet):
+    """Get all transactions from Google Sheets"""
     try:
-        response = llm.invoke(prompt)
-        return response.content
+        data = sheet.get_all_records()
+        if data:
+            df = pd.DataFrame(data)
+            df['Timestamp'] = pd.to_datetime(df['Timestamp'])
+            return df
+        return pd.DataFrame()
     except Exception as e:
-        return f"Error generating summary: {e}"
+        st.error(f"Error fetching transactions: {e}")
+        return pd.DataFrame()
 
-def generate_pdf(summary, segment_scores, overall_score, overall_tag, user_data, all_responses, df):
-    pdf = FPDF()
-    pdf.add_page()
-    pdf.set_auto_page_break(auto=True, margin=15)
+def initialize_transactions_sheet(sheet):
+    """Initialize sheet with headers if empty"""
+    try:
+        if sheet.row_count == 0 or not sheet.row_values(1):
+            headers = ["Timestamp", "User", "Name", "Description", "Amount", "Type", "Payment Mode"]
+            sheet.append_row(headers)
+    except Exception as e:
+        st.error(f"Error initializing sheet: {e}")
 
-    # Helper function to clean text for PDF (remove unicode characters)
-    def clean_text(text):
-        """Replace unicode characters that can't be encoded in latin-1"""
-        text = str(text)
-        # Replace common unicode quotes and apostrophes
-        text = text.replace('\u2019', "'")  # Right single quotation mark
-        text = text.replace('\u2018', "'")  # Left single quotation mark
-        text = text.replace('\u201c', '"')  # Left double quotation mark
-        text = text.replace('\u201d', '"')  # Right double quotation mark
-        text = text.replace('\u2013', '-')  # En dash
-        text = text.replace('\u2014', '-')  # Em dash
-        text = text.replace('\u2026', '...')  # Ellipsis
-        # Remove any remaining non-latin1 characters
-        text = text.encode('latin-1', 'ignore').decode('latin-1')
-        return text
+def get_today_stats(df, username, is_admin):
+    """Get today's statistics"""
+    today = datetime.now().date()
+    if not df.empty and 'Timestamp' in df.columns:
+        df['Date'] = pd.to_datetime(df['Timestamp']).dt.date
+        today_df = df[df['Date'] == today]
+        if not is_admin:
+            today_df = today_df[today_df['User'] == username]
+        if not today_df.empty:
+            paid = today_df[today_df['Type'] == 'Paid']['Amount'].sum()
+            received = today_df[today_df['Type'] == 'Received']['Amount'].sum()
+            balance = received - paid
+            return paid, received, balance
+    return 0, 0, 0
 
-    # Navy blue color (RGB: 0, 31, 63)
-    navy_blue = (0, 31, 63)
-    light_gray = (240, 240, 240)
+def get_user_summary(df, start_date, end_date):
+    """Get summary by user for admin view"""
+    if df.empty:
+        return pd.DataFrame()
+    df['Date'] = pd.to_datetime(df['Timestamp']).dt.date
+    filtered_df = df[(df['Date'] >= start_date) & (df['Date'] <= end_date)]
+    if filtered_df.empty:
+        return pd.DataFrame()
+    user_summary = []
+    for user in filtered_df['User'].unique():
+        user_df = filtered_df[filtered_df['User'] == user]
+        paid = user_df[user_df['Type'] == 'Paid']['Amount'].sum()
+        received = user_df[user_df['Type'] == 'Received']['Amount'].sum()
+        balance = received - paid
+        user_summary.append({'User': user, 'Paid': paid, 'Received': received, 'Balance': balance})
+    return pd.DataFrame(user_summary)
 
-    # HEADER - Title with background
-    pdf.set_fill_color(navy_blue[0], navy_blue[1], navy_blue[2])
-    pdf.set_text_color(255, 255, 255)
-    pdf.set_font("Arial", "B", 20)
-    pdf.cell(0, 15, "AI Maturity Assessment Report", ln=True, align="C", fill=True)
-    pdf.ln(8)
+def create_pdf_statement(df, start_date, end_date, username, is_admin):
+    """Generate PDF statement"""
+    buffer = BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, rightMargin=30, leftMargin=30, topMargin=30, bottomMargin=18)
+    elements = []
+    styles = getSampleStyleSheet()
+    title_style = ParagraphStyle('CustomTitle', parent=styles['Heading1'], fontSize=24, textColor=colors.Color(0, 0, 104/255), spaceAfter=30, alignment=1)
+    title = Paragraph("Statement of Accounts", title_style)
+    elements.append(title)
+    elements.append(Spacer(1, 12))
+    info_text = f"<b>Period:</b> {start_date.strftime('%d %b %Y')} to {end_date.strftime('%d %b %Y')}<br/>"
+    if not is_admin:
+        info_text += f"<b>User:</b> {username}<br/>"
+    info_text += f"<b>Generated on:</b> {datetime.now().strftime('%d %b %Y %I:%M %p')}"
+    info = Paragraph(info_text, styles['Normal'])
+    elements.append(info)
+    elements.append(Spacer(1, 20))
+    total_paid = df[df['Type'] == 'Paid']['Amount'].sum()
+    total_received = df[df['Type'] == 'Received']['Amount'].sum()
+    balance = total_received - total_paid
+    summary_data = [['Summary', ''], ['Total Paid', f'₹{total_paid:,.2f}'], ['Total Received', f'₹{total_received:,.2f}'], ['Net Balance', f'₹{balance:,.2f}']]
+    summary_table = Table(summary_data, colWidths=[3*inch, 2*inch])
+    summary_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (-1, 0), colors.Color(0, 0, 104/255)), ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke), ('ALIGN', (0, 0), (-1, -1), 'LEFT'), ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'), ('FONTSIZE', (0, 0), (-1, 0), 14), ('BOTTOMPADDING', (0, 0), (-1, 0), 12), ('BACKGROUND', (0, 1), (-1, -1), colors.beige), ('GRID', (0, 0), (-1, -1), 1, colors.black), ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'), ('FONTSIZE', (0, 1), (-1, -1), 11), ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey])]))
+    elements.append(summary_table)
+    elements.append(Spacer(1, 30))
+    table_data = [['Date', 'Name', 'Type', 'Amount', 'Payment', 'Description']]
+    for idx, row in df.sort_values('Timestamp', ascending=False).iterrows():
+        desc_value = row.get('Description', row.get('Notes', ''))
+        table_data.append([row['Timestamp'].strftime('%d %b %y'), row['Name'][:20], row['Type'], f"₹{row['Amount']:,.0f}", row['Payment Mode'], str(desc_value)[:30] if desc_value else ''])
+    transactions_table = Table(table_data, colWidths=[0.9*inch, 1.2*inch, 0.9*inch, 1*inch, 0.9*inch, 1.6*inch])
+    transactions_table.setStyle(TableStyle([('BACKGROUND', (0, 0), (-1, 0), colors.Color(0, 0, 104/255)), ('TEXTCOLOR', (0, 0), (-1, 0), colors.whitesmoke), ('ALIGN', (0, 0), (-1, -1), 'LEFT'), ('FONTNAME', (0, 0), (-1, 0), 'Helvetica-Bold'), ('FONTSIZE', (0, 0), (-1, 0), 10), ('BOTTOMPADDING', (0, 0), (-1, 0), 8), ('FONTNAME', (0, 1), (-1, -1), 'Helvetica'), ('FONTSIZE', (0, 1), (-1, -1), 9), ('GRID', (0, 0), (-1, -1), 0.5, colors.grey), ('ROWBACKGROUNDS', (0, 1), (-1, -1), [colors.white, colors.lightgrey]), ('VALIGN', (0, 0), (-1, -1), 'TOP')]))
+    elements.append(transactions_table)
+    doc.build(elements)
+    buffer.seek(0)
+    return buffer
 
-    # User Info Section - Light gray box
-    pdf.set_fill_color(light_gray[0], light_gray[1], light_gray[2])
-    pdf.set_text_color(0, 0, 0)
-    pdf.set_font("Arial", "B", 11)
-    pdf.cell(0, 8, "Assessment Details", ln=True, fill=True)
-    pdf.set_font("Arial", "", 10)
-    pdf.cell(0, 6, clean_text(f"Name: {user_data['name']}"), ln=True)
-    pdf.cell(0, 6, clean_text(f"Organization: {user_data['organization']}"), ln=True)
-    pdf.cell(0, 6, f"Date: {datetime.now().strftime('%B %d, %Y')}", ln=True)
-    pdf.ln(10)
+# Navy Blue Theme CSS - RGB(0,0,104) - Mobile Optimized
+st.markdown("""
+    <style>
+    /* Main background - Navy Blue RGB(0,0,104) */
+    .stApp {
+        background: rgb(0, 0, 104);
+    }
 
-    # Overall Score - Prominent display with scaled score (0-100)
-    overall_score_100 = round(overall_score * 100)
-    pdf.set_fill_color(navy_blue[0], navy_blue[1], navy_blue[2])
-    pdf.set_text_color(255, 255, 255)
-    pdf.set_font("Arial", "B", 16)
-    pdf.cell(0, 12, f"Overall Score: {overall_score_100}/100 - {overall_tag}", ln=True, align="C", fill=True)
-    pdf.ln(10)
+    /* Content area */
+    .block-container {
+        background-color: #ffffff;
+        border-radius: 10px;
+        padding: 1rem !important;
+        max-width: 100% !important;
+    }
 
-    # Segment Scores Section
-    pdf.set_text_color(navy_blue[0], navy_blue[1], navy_blue[2])
-    pdf.set_font("Arial", "B", 14)
-    pdf.cell(0, 10, "Segment Performance", ln=True)
-    pdf.ln(2)
+    /* Headers */
+    h1, h2, h3 {
+        color: rgb(0, 0, 104) !important;
+    }
+    h1 { font-size: 22px !important; margin: 5px 0 !important; }
+    h2 { font-size: 18px !important; margin: 10px 0 5px 0 !important; }
+    h3 { font-size: 16px !important; margin: 8px 0 !important; }
 
-    # Segment scores in a table format
-    pdf.set_text_color(0, 0, 0)
-    pdf.set_font("Arial", "B", 10)
-    pdf.set_fill_color(light_gray[0], light_gray[1], light_gray[2])
-    pdf.cell(100, 7, "Segment", border=1, fill=True)
-    pdf.cell(45, 7, "Score", border=1, align="C", fill=True)
-    pdf.cell(45, 7, "Level", border=1, align="C", fill=True, ln=True)
+    /* Buttons - Smaller for mobile */
+    .stButton > button {
+        width: 100%;
+        height: 50px !important;
+        font-size: 14px !important;
+        font-weight: bold;
+        margin: 2px 0 !important;
+        border-radius: 6px;
+        transition: all 0.1s ease;
+    }
 
-    pdf.set_font("Arial", "", 10)
-    for segment, data in segment_scores.items():
-        segment_score_100 = round(data['score'] * 100)
-        pdf.cell(100, 7, clean_text(segment), border=1)
-        pdf.cell(45, 7, f"{segment_score_100}/100", border=1, align="C")
-        pdf.cell(45, 7, clean_text(get_tag(data['score'])), border=1, align="C", ln=True)
-    pdf.ln(10)
+    /* Primary buttons - Navy Blue RGB(0,0,104) */
+    .stButton > button[kind="primary"] {
+        background: rgb(0, 0, 104) !important;
+        color: white !important;
+        border: 2px solid rgb(0, 0, 104) !important;
+    }
 
-    # Executive Summary Section
-    pdf.set_text_color(navy_blue[0], navy_blue[1], navy_blue[2])
-    pdf.set_font("Arial", "B", 14)
-    pdf.cell(0, 10, "Executive Summary", ln=True)
-    pdf.ln(2)
+    /* Secondary buttons */
+    .stButton > button[kind="secondary"] {
+        background: #e6f2ff !important;
+        color: rgb(0, 0, 104) !important;
+        border: 2px solid #99ccff !important;
+    }
 
-    # Parse and beautify summary content
-    pdf.set_text_color(0, 0, 0)
-    pdf.set_font("Arial", "", 10)
+    .stButton > button:hover {
+        transform: scale(1.02);
+        box-shadow: 0 2px 8px rgba(0, 0, 104, 0.3) !important;
+    }
 
-    lines = summary.split('\n')
-    in_list = False
+    /* Text inputs - Compact */
+    .stTextInput > div > div > input,
+    .stNumberInput > div > div > input {
+        font-size: 16px !important;
+        padding: 10px !important;
+        border: 2px solid #99ccff !important;
+        border-radius: 6px !important;
+    }
 
-    for line in lines:
-        line = line.strip()
-        if not line:
-            pdf.ln(3)
-            in_list = False
-            continue
+    .stTextInput > div > div > input:focus,
+    .stNumberInput > div > div > input:focus {
+        border-color: rgb(0, 0, 104) !important;
+        box-shadow: 0 0 0 2px rgba(0, 0, 104, 0.2) !important;
+    }
 
-        # Remove ALL asterisks from the line
-        line_clean = line.replace('**', '').replace('*', '').strip()
-        # Clean unicode characters
-        line_clean = clean_text(line_clean)
+    /* Metric cards - Compact */
+    [data-testid="stMetric"] {
+        background: #e6f2ff;
+        padding: 10px !important;
+        border-radius: 8px;
+        border: 2px solid #99ccff;
+    }
 
-        # Check for numbered headings (1., 2., 3., etc.)
-        if line_clean and line_clean[0].isdigit() and '. ' in line_clean[:5]:
-            # This is a main heading
-            pdf.ln(5)
-            pdf.set_text_color(navy_blue[0], navy_blue[1], navy_blue[2])
-            pdf.set_font("Arial", "B", 12)
-            pdf.multi_cell(0, 6, line_clean)
-            pdf.set_text_color(0, 0, 0)
-            pdf.set_font("Arial", "", 10)
-            pdf.ln(2)
-            in_list = False
-        # Check for bullet points (starting with -)
-        elif line_clean.startswith('-'):
-            bullet_text = line_clean[1:].strip()
-            pdf.set_font("Arial", "", 10)
-            # Indent bullet points - use simple dash instead of Unicode bullet
-            pdf.cell(10)
-            pdf.multi_cell(0, 5, f"- {bullet_text}")
-            in_list = True
-        else:
-            # Regular paragraph text
-            if in_list:
-                pdf.ln(2)
-                in_list = False
-            pdf.set_font("Arial", "", 10)
-            pdf.multi_cell(0, 5, line_clean)
+    [data-testid="stMetricValue"] {
+        font-size: 20px !important;
+        font-weight: bold !important;
+        color: rgb(0, 0, 104) !important;
+    }
 
-    # Add new page for user responses
-    pdf.add_page()
+    [data-testid="stMetricLabel"] {
+        font-size: 12px !important;
+        color: rgb(0, 0, 104) !important;
+        font-weight: 600 !important;
+    }
 
-    # Your Responses Section
-    pdf.set_text_color(navy_blue[0], navy_blue[1], navy_blue[2])
-    pdf.set_font("Arial", "B", 16)
-    pdf.cell(0, 10, "Your Responses", ln=True)
-    pdf.ln(5)
+    /* Tabs */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 4px;
+        background-color: #e6f2ff;
+        border-radius: 8px;
+        padding: 4px;
+    }
 
-    # Group responses by segment
-    for segment in df['Segment'].unique().tolist():
-        # Segment header
-        pdf.set_fill_color(light_gray[0], light_gray[1], light_gray[2])
-        pdf.set_text_color(navy_blue[0], navy_blue[1], navy_blue[2])
-        pdf.set_font("Arial", "B", 12)
-        pdf.cell(0, 8, clean_text(segment), ln=True, fill=True)
-        pdf.ln(3)
+    .stTabs [data-baseweb="tab"] {
+        color: rgb(0, 0, 104) !important;
+        font-weight: 600;
+        font-size: 14px !important;
+        padding: 8px 12px !important;
+    }
 
-        # Get responses for this segment
-        segment_responses = {k: v for k, v in all_responses.items() if v['segment'] == segment}
+    .stTabs [aria-selected="true"] {
+        background: rgb(0, 0, 104) !important;
+        color: white !important;
+    }
 
-        pdf.set_text_color(0, 0, 0)
-        for key, resp_data in segment_responses.items():
-            question = clean_text(resp_data['question'])
-            answer = clean_text(resp_data['answer'])
+    /* Date inputs */
+    .stDateInput > div > div > input {
+        font-size: 14px !important;
+        border: 2px solid #99ccff !important;
+        border-radius: 6px !important;
+    }
 
-            # Question in smaller font
-            pdf.set_font("Arial", "B", 8)
-            pdf.multi_cell(0, 4, f"Q: {question}")
+    /* Column spacing - Tighter */
+    div[data-testid="column"] {
+        padding: 0px 4px !important;
+    }
 
-            # Answer in even smaller font, indented
-            pdf.set_font("Arial", "", 7)
-            pdf.cell(10)  # Indent
-            pdf.multi_cell(0, 4, f"A: {answer}")
-            pdf.ln(2)
+    /* Force button columns to be equal width */
+    [data-testid="column"] > div {
+        width: 100% !important;
+    }
 
-        pdf.ln(3)
+    /* Success/Error messages */
+    .stSuccess {
+        background-color: #d4edda !important;
+        color: #155724 !important;
+        padding: 12px !important;
+        border-radius: 8px !important;
+        border-left: 4px solid #28a745 !important;
+        font-weight: bold !important;
+    }
 
-    # Footer
-    pdf.ln(10)
-    pdf.set_text_color(128, 128, 128)
-    pdf.set_font("Arial", "I", 8)
-    pdf.cell(0, 5, "This report was generated by the AI Maturity Assessment Tool", ln=True, align="C")
+    .stError {
+        background-color: #f8d7da !important;
+        color: #721c24 !important;
+        border-left: 4px solid #dc3545 !important;
+    }
 
-    file_path = "AI_Maturity_Report.pdf"
-    pdf.output(file_path)
-    return file_path
+    /* Info messages */
+    .stInfo {
+        background-color: #d1ecf1 !important;
+        color: #0c5460 !important;
+        font-size: 14px !important;
+    }
 
-# -----------------------------
-# STREAMLIT UI
-# -----------------------------
-st.title("AI Maturity & Readiness Assessment Tool")
-
-# Initialize session state
-if 'user_info_submitted' not in st.session_state:
-    st.session_state.user_info_submitted = False
-if 'user_data' not in st.session_state:
-    st.session_state.user_data = {}
-if 'current_section' not in st.session_state:
-    st.session_state.current_section = 0
-if 'all_responses' not in st.session_state:
-    st.session_state.all_responses = {}
-if 'assessment_completed' not in st.session_state:
-    st.session_state.assessment_completed = False
-if 'report_generated' not in st.session_state:
-    st.session_state.report_generated = False
-if 'segment_scores' not in st.session_state:
-    st.session_state.segment_scores = None
-if 'overall_score' not in st.session_state:
-    st.session_state.overall_score = None
-if 'overall_tag' not in st.session_state:
-    st.session_state.overall_tag = None
-if 'summary' not in st.session_state:
-    st.session_state.summary = None
-if 'validation_error' not in st.session_state:
-    st.session_state.validation_error = None
-if 'generating_report' not in st.session_state:
-    st.session_state.generating_report = False
-
-# Step 1: User Information
-if not st.session_state.user_info_submitted:
-
-    with st.form("user_info_form", clear_on_submit=False):
-        col1, col2 = st.columns(2)
-        with col1:
-            user_name = st.text_input("Full Name *", placeholder="Enter your full name", key="user_name_input")
-            user_email = st.text_input("Email *", placeholder="Enter your email", key="user_email_input")
-        with col2:
-            user_org = st.text_input("Organization *", placeholder="Enter your organization", key="user_org_input")
-            user_phone = st.text_input("Phone Number (Optional)", placeholder="Enter your phone number", key="user_phone_input")
-
-        # Hardcoded spacing before the button - fixed gap
-        st.markdown("<div style='margin-top: 80px;'></div>", unsafe_allow_html=True)
-
-        submit_info = st.form_submit_button("Continue to Assessment", type="primary", use_container_width=True)
-
-        if submit_info:
-            if not user_name or not user_email or not user_org:
-                st.error("Please provide Full Name, Email, and Organization to continue.")
-            else:
-                with st.spinner(''):
-                    st.session_state.user_info_submitted = True
-                    st.session_state.user_data = {
-                        'name': user_name,
-                        'email': user_email,
-                        'phone': user_phone if user_phone else "N/A",
-                        'organization': user_org
-                    }
-                    st.session_state.current_section = 0  # Reset to first section
-                    st.rerun()
-
-# Step 2: Questionnaire with Sidebar Navigation
-elif st.session_state.user_info_submitted and not st.session_state.assessment_completed:
-    # Get segments
-    segments_list = df['Segment'].unique().tolist()
-
-    # Sidebar with logo and navigation
-    with st.sidebar:
-        # Databeat Logo - with white background container (80% size)
-        st.markdown("""
-        <div style="background-color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; margin-left: auto; margin-right: auto; width: 80%;">
-            <img src="https://databeat.io/wp-content/uploads/2025/05/DataBeat-Mediamint-Logo-1-1.png"
-                 style="width: 100%; height: auto; display: block;">
-        </div>
-        """, unsafe_allow_html=True)
-
-        st.markdown("---")
-        st.markdown("### Navigate Sections")
-        for idx, segment in enumerate(segments_list):
-            # Determine button type based on current section
-            is_current = (idx == st.session_state.current_section)
-            button_type = "primary" if is_current else "secondary"
-
-            if st.button(segment, key=f"nav_{idx}", use_container_width=True, type=button_type):
-                # When clicking on a new section, reset to that section's first question
-                st.session_state.current_section = idx
-                st.rerun()
-
-        # Add Submit Assessment button in sidebar
-        st.markdown("---")
-        if st.button("📊 Submit Assessment & Generate Report", key="sidebar_submit_btn", use_container_width=True, type="primary"):
-            # Validate all questions are answered before submitting
-            segments_list_all = df['Segment'].unique().tolist()
-            unanswered_sections = []
-
-            for seg_idx, seg_name in enumerate(segments_list_all):
-                seg_df = df[df['Segment'] == seg_name].reset_index(drop=True)
-                for q_idx, q_row in seg_df.iterrows():
-                    q_key = f"{seg_name}_{q_idx}"
-                    answer = st.session_state.all_responses.get(q_key, {}).get('answer', '')
-                    if not answer or answer.strip() == '':
-                        if seg_name not in unanswered_sections:
-                            unanswered_sections.append(seg_name)
-                        break
-
-            if unanswered_sections:
-                # Store error in session state to display near button
-                st.session_state.validation_error = unanswered_sections
-                st.rerun()
-            else:
-                # Clear any previous errors
-                st.session_state.validation_error = None
-                st.session_state.generating_report = True
-                st.session_state.assessment_completed = True
-                st.rerun()
-
-        # Display validation error below sidebar button if exists
-        if st.session_state.validation_error:
-            error_message = "⚠️ **Please answer all questions before submitting.**\n\nUnanswered sections:"
-            for section in st.session_state.validation_error:
-                error_message += f"\n- {section}"
-            st.error(error_message)
-        elif st.session_state.generating_report and st.session_state.assessment_completed and not st.session_state.report_generated:
-            st.info("🔄 Generating report... Please wait")
-
-    # Display current section
-    current_idx = st.session_state.current_section
-    segment = segments_list[current_idx]
-
-    # Scroll to top - using multiple methods for better compatibility
-    st.markdown(f'<div id="section-top-{current_idx}"></div>', unsafe_allow_html=True)
-    st.markdown("""
-    <script>
-        // Multiple scroll methods for better browser compatibility
-        setTimeout(function() {
-            // Method 1: Scroll parent window
-            window.parent.scrollTo(0, 0);
-
-            // Method 2: Scroll main section
-            var mainSection = window.parent.document.querySelector('section.main');
-            if (mainSection) {
-                mainSection.scrollTop = 0;
-            }
-
-            // Method 3: Scroll body
-            window.parent.document.body.scrollTop = 0;
-            window.parent.document.documentElement.scrollTop = 0;
-
-            // Method 4: Scroll to element
-            var appView = window.parent.document.querySelector('.main .block-container');
-            if (appView) {
-                appView.scrollIntoView({ behavior: 'instant', block: 'start' });
-            }
-        }, 10);
-    </script>
+    /* Hide sidebar */
+    section[data-testid="stSidebar"] { display: none; }
+    </style>
     """, unsafe_allow_html=True)
 
-    st.header(f"Section {current_idx + 1}/{len(segments_list)}: {segment}")
+# Initialize session state
+if 'logged_in' not in st.session_state:
+    st.session_state.logged_in = False
+if 'username' not in st.session_state:
+    st.session_state.username = ""
+if 'display_name' not in st.session_state:
+    st.session_state.display_name = ""
+if 'is_admin' not in st.session_state:
+    st.session_state.is_admin = False
+if 'transaction_type' not in st.session_state:
+    st.session_state.transaction_type = None
+if 'payment_mode' not in st.session_state:
+    st.session_state.payment_mode = None
+if 'show_register' not in st.session_state:
+    st.session_state.show_register = False
+if 'show_success' not in st.session_state:
+    st.session_state.show_success = False
+if 'name_input' not in st.session_state:
+    st.session_state.name_input = ""
+if 'amount_input' not in st.session_state:
+    st.session_state.amount_input = 0.0
+if 'description_input' not in st.session_state:
+    st.session_state.description_input = ""
 
-    segment_df = df[df['Segment'] == segment].reset_index(drop=True)
+# Login/Registration section
+if not st.session_state.logged_in:
+    st.title("Login")
 
-    # Main content area - display questions without form for immediate state saving
-    # Display questions for current section
-    for i, row in segment_df.iterrows():
-        question = row['Question']
-        options_str = row['Options']
-
-        # Parse options
-        if pd.notna(options_str):
-            if '\n' in str(options_str):
-                options = [opt.strip().lstrip('*').strip() for opt in str(options_str).split('\n') if opt.strip()]
-            elif '/' in str(options_str):
-                options_clean = str(options_str).strip('()').strip()
-                options = [opt.strip() for opt in options_clean.split('/') if opt.strip()]
+    spreadsheet = get_google_sheet()
+    if spreadsheet:
+        cred_sheet = get_credentials_sheet(spreadsheet)
+        if cred_sheet:
+            if not st.session_state.show_register:
+                username = st.text_input("Username", key="login_username", placeholder="Enter your username")
+                password = st.text_input("Password", type="password", key="login_password", placeholder="Enter password")
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button("Login", key="login_btn", use_container_width=True, type="primary"):
+                        if username and password:
+                            success, role, name = authenticate_user(cred_sheet, username, password)
+                            if success:
+                                st.session_state.logged_in = True
+                                st.session_state.username = username
+                                st.session_state.display_name = name
+                                st.session_state.is_admin = (role == "admin")
+                                st.rerun()
+                            else:
+                                st.error("Invalid username or password")
+                        else:
+                            st.warning("Please enter username and password")
+                with col2:
+                    if st.button("Create Account", key="create_account_btn", use_container_width=True):
+                        st.session_state.show_register = True
+                        st.rerun()
             else:
-                options = ["Yes", "No", "Not Sure"]
+                st.subheader("Create New Account")
+                new_name = st.text_input("Full Name", key="reg_name", placeholder="Enter your full name")
+                new_phone = st.text_input("Phone Number", key="reg_phone", placeholder="Enter your phone number")
+                new_username = st.text_input("Username", key="reg_username", placeholder="Choose a username")
+                new_password = st.text_input("Password", key="reg_password", placeholder="Choose a password")
+                confirm_password = st.text_input("Confirm Password", key="reg_confirm_password", placeholder="Confirm your password")
+                col1, col2 = st.columns(2)
+                with col1:
+                    if st.button("Register", key="register_btn", use_container_width=True, type="primary"):
+                        if not all([new_name, new_phone, new_username, new_password]):
+                            st.error("Please fill all fields")
+                        elif new_password != confirm_password:
+                            st.error("Passwords do not match")
+                        elif len(new_password) < 4:
+                            st.error("Password must be at least 4 characters")
+                        else:
+                            success, message = create_user_account(cred_sheet, new_username, new_password, new_phone, new_name)
+                            if success:
+                                st.success(message)
+                                st.info("Please login with your new credentials")
+                                st.session_state.show_register = False
+                                st.rerun()
+                            else:
+                                st.error(message)
+                with col2:
+                    if st.button("Back to Login", key="back_login_btn", use_container_width=True):
+                        st.session_state.show_register = False
+                        st.rerun()
         else:
-            options = ["Yes", "No", "Not Sure"]
+            st.error("Could not access credentials sheet")
+    else:
+        st.error("Could not connect to Google Sheets")
 
-        question_key = f"{segment}_{i}"
-        st.markdown(f"**{question}**")
+else:
+    # Logout button at top right
+    col1, col2 = st.columns([7, 2])
+    with col2:
+        if st.button("Logout", key="logout_btn", use_container_width=True, type="secondary"):
+            st.session_state.logged_in = False
+            st.session_state.username = ""
+            st.session_state.display_name = ""
+            st.session_state.is_admin = False
+            st.session_state.transaction_type = None
+            st.session_state.payment_mode = None
+            st.rerun()
 
-        # Get existing response if any
-        default_answer = st.session_state.all_responses.get(question_key, {}).get('answer', '')
-        default_index = None
+    spreadsheet = get_google_sheet()
+    if spreadsheet:
+        trans_sheet = get_transactions_sheet(spreadsheet)
+        if trans_sheet:
+            initialize_transactions_sheet(trans_sheet)
+            df = get_transactions(trans_sheet)
+            user_df = df.copy() if not df.empty else df
+            if not df.empty and not st.session_state.is_admin:
+                user_df = df[df['User'] == st.session_state.username]
 
-        # Check if this is a "1 to 5 Rating" question
-        if "1 to 5 Rating" in str(options_str) or options == ['1', '2', '3', '4', '5']:
-            # Display horizontally for rating questions ONLY with Lowest/Highest labels
-            display_options = ["1 (Lowest)", '2', '3', '4', "5 (Highest)"]
+            # TODAY'S KPI BOXES - Paid and Received side by side, Balance below
+            st.markdown("### Today's Summary")
+            today_paid, today_received, today_balance = get_today_stats(user_df, st.session_state.username, st.session_state.is_admin)
 
-            # Map stored answer to display option for rating questions
-            if default_answer:
-                rating_map = {'1': 0, '2': 1, '3': 2, '4': 3, '5': 4}
-                default_index = rating_map.get(default_answer, None)
-
-            response = st.radio(
-                "Select your answer:",
-                display_options,
-                key=f"radio_{question_key}",
-                index=default_index,
-                label_visibility="collapsed",
-                horizontal=True
-            )
-            # Extract just the number from the response for storage
-            if response:
-                response = response.split()[0]  # Gets '1', '2', '3', '4', or '5'
-        else:
-            # Display vertically for ALL other questions
-            # Set default index for non-rating questions
-            if default_answer and default_answer in options:
-                default_index = options.index(default_answer)
-
-            response = st.radio(
-                "Select your answer:",
-                options,
-                key=f"radio_{question_key}",
-                index=default_index,
-                label_visibility="collapsed",
-                horizontal=False
-            )
-
-        # Store response in session state - always store to maintain state
-        st.session_state.all_responses[question_key] = {
-            'segment': segment,
-            'sub_segment': row['Sub Segment'] if 'Sub Segment' in row else '',
-            'question': question,
-            'answer': response if response else '',
-            'weightage': row['Weightage']
-        }
-
-        # Clear validation error when user answers a question
-        if response and st.session_state.validation_error:
-            st.session_state.validation_error = None
-
-        # Increased gap between questions - larger spacing
-        st.markdown("<div style='margin-bottom: 40px;'></div>", unsafe_allow_html=True)
-
-    # Navigation buttons - outside of form for immediate updates
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col1:
-        if current_idx > 0:
-            if st.button("← Previous Section", use_container_width=True, key="prev_section_btn"):
-                st.session_state.current_section = current_idx - 1
-                st.rerun()
-        else:
-            st.write("")
-    with col3:
-        if current_idx < len(segments_list) - 1:
-            if st.button("Next Section →", use_container_width=True, key="next_section_btn"):
-                st.session_state.current_section = current_idx + 1
-                st.rerun()
-        else:
-            if st.button("Submit Assessment & Generate Report", type="primary", use_container_width=True, key="submit_assessment_btn"):
-                # Validate all questions are answered before submitting
-                segments_list_all = df['Segment'].unique().tolist()
-                unanswered_sections = []
-
-                for seg_idx, seg_name in enumerate(segments_list_all):
-                    seg_df = df[df['Segment'] == seg_name].reset_index(drop=True)
-                    for q_idx, q_row in seg_df.iterrows():
-                        q_key = f"{seg_name}_{q_idx}"
-                        answer = st.session_state.all_responses.get(q_key, {}).get('answer', '')
-                        if not answer or answer.strip() == '':
-                            if seg_name not in unanswered_sections:
-                                unanswered_sections.append(seg_name)
-                            break
-
-                if unanswered_sections:
-                    # Store error in session state to display near button
-                    st.session_state.validation_error = unanswered_sections
-                    st.rerun()
-                else:
-                    # Clear any previous errors
-                    st.session_state.validation_error = None
-                    st.session_state.generating_report = True
-                    st.session_state.assessment_completed = True
-                    st.rerun()
-
-    # Display validation error or loading status below the submit button
-    if st.session_state.validation_error:
-        error_message = "⚠️ **Please answer all questions before submitting.**\n\nUnanswered sections:"
-        for section in st.session_state.validation_error:
-            error_message += f"\n- {section}"
-        st.error(error_message)
-    elif st.session_state.assessment_completed and not st.session_state.report_generated:
-        # Show loading animation near the button
-        with st.spinner("Generating the report..."):
-            pass  # The actual processing happens in Step 2.5
-
-# Step 2.5: Report Generation (happens after assessment_completed but before showing results)
-elif st.session_state.assessment_completed and not st.session_state.report_generated:
-    # Show loading status
-    with st.spinner("Generating the report..."):
-        segment_scores = calculate_segment_scores(st.session_state.all_responses, df)
-        total_weighted_score = sum(data['weighted_score'] for data in segment_scores.values())
-        total_weight = sum(data['weightage'] for data in segment_scores.values())
-        overall_score = total_weighted_score / total_weight if total_weight > 0 else 0
-        overall_tag = get_tag(overall_score)
-
-        if GOOGLE_SHEETS_AVAILABLE:
-            save_to_google_sheets_responses(st.session_state.user_data, st.session_state.all_responses, SHEET_ID, df, overall_score, segment_scores)
-
-        summary = generate_summary(segment_scores, overall_score, overall_tag)
-
-        # Store in session state
-        st.session_state.segment_scores = segment_scores
-        st.session_state.overall_score = overall_score
-        st.session_state.overall_tag = overall_tag
-        st.session_state.summary = summary
-        st.session_state.report_generated = True
-        st.session_state.generating_report = False
-
-    # Rerun to show results
-    st.rerun()
-
-# Step 3: Display results
-elif st.session_state.assessment_completed and st.session_state.report_generated:
-    all_responses = st.session_state.all_responses
-
-    # Use stored results
-    if st.session_state.report_generated:
-        segment_scores = st.session_state.segment_scores
-        overall_score = st.session_state.overall_score
-        overall_tag = st.session_state.overall_tag
-        summary = st.session_state.summary
-
-        # Display overall score and tag (scaled 0-100) - show as integer
-        overall_score_100 = round(overall_score * 100)
-        col1, col2 = st.columns(2)
-        with col1:
-            st.metric("Overall AI Maturity Score", f"{overall_score_100}/100")
-        with col2:
-            st.metric("Maturity Level", overall_tag)
-
-        st.subheader("Segment Scores")
-
-        # Create DataFrame with scaled scores (0-100)
-        viz_df = pd.DataFrame([
-            {
-                'Segment': seg,
-                'Score (0-100)': data['score'] * 100,
-                'Score': data['score'],  # Keep 0-1 score for radar chart
-                'Tag': get_tag(data['score']),
-                'Weightage': data['weightage']
-            }
-            for seg, data in segment_scores.items()
-        ])
-
-        # Display segment scores with tags in a nice format - show as integers
-        st.markdown("### Individual Segment Performance")
-        for seg, data in segment_scores.items():
-            score_100 = round(data['score'] * 100)
-            tag = get_tag(data['score'])
-            col1, col2, col3 = st.columns([3, 1, 1])
+            col1, col2 = st.columns(2)
             with col1:
-                st.markdown(f"**{seg}**")
+                st.metric("Paid", f"₹{today_paid:,.0f}")
             with col2:
-                st.markdown(f"**{score_100}/100**")
-            with col3:
-                st.markdown(f"**{tag}**")
+                st.metric("Received", f"₹{today_received:,.0f}")
 
-        st.markdown("---")
+            st.metric("Balance", f"₹{today_balance:,.0f}")
+            st.markdown("---")
 
-        # Create Radar Chart
-        st.subheader("AI Maturity Radar Chart")
-        radar_fig = px.line_polar(
-            viz_df,
-            r='Score (0-100)',
-            theta='Segment',
-            line_close=True,
-            range_r=[0, 100],
-            title="AI Maturity Assessment - Segment Analysis"
-        )
-        radar_fig.update_traces(
-            fill='toself',
-            fillcolor='rgba(0, 31, 63, 0.3)',
-            line=dict(color='#001f3f', width=3)
-        )
-        radar_fig.update_layout(
-            polar=dict(
-                radialaxis=dict(
-                    visible=True,
-                    range=[0, 100],
-                    showticklabels=True,
-                    ticks='outside',
-                    tickfont=dict(size=12)
-                ),
-                angularaxis=dict(
-                    tickfont=dict(size=12)
-                )
-            ),
-            showlegend=False,
-            height=600
-        )
-        st.plotly_chart(radar_fig, use_container_width=True)
+            # TABS
+            if st.session_state.is_admin:
+                tab1, tab2, tab3 = st.tabs(["New Entry", "Download Statement", "User Summary"])
+            else:
+                tab1, tab2 = st.tabs(["New Entry", "Download Statement"])
 
-        # Bar Chart with scaled scores
-        st.subheader("Segment Comparison")
-        bar_fig = px.bar(
-            viz_df,
-            x="Segment",
-            y="Score (0-100)",
-            color="Tag",
-            range_y=[0, 100],
-            color_discrete_map={
-                "Novice": "#ff4b4b",
-                "Explorer": "#ffa600",
-                "PaceSetter": "#00cc96",
-                "Trailblazer": "#636efa"
-            },
-            title="AI Maturity Scores by Segment (0-100 Scale)",
-            text="Score (0-100)"
-        )
-        bar_fig.update_traces(texttemplate='%{text:.0f}', textposition='outside')
-        st.plotly_chart(bar_fig, use_container_width=True)
+            with tab1:
+                st.header("New Entry")
 
-        st.subheader("Executive Summary")
-        st.markdown(summary)
+                name = st.text_input("Name", value=st.session_state.name_input, placeholder="Enter person/vendor name", key="name_field")
+                amount = st.number_input("Amount (₹)", value=st.session_state.amount_input, min_value=0.0, step=10.0, format="%.0f", key="amount_field")
+                description = st.text_input("Description", value=st.session_state.description_input, placeholder="Add details...", key="desc_field")
 
-        # Display user responses
-        st.markdown("---")
-        st.subheader("Your Responses")
+                st.subheader("Type")
+                # Hardcoded 2 columns for Type buttons
+                col1, col2 = st.columns([1, 1])
+                with col1:
+                    btn_type = "primary" if st.session_state.transaction_type == "Paid" else "secondary"
+                    if st.button("PAID", use_container_width=True, type=btn_type, key="btn_paid"):
+                        st.session_state.transaction_type = "Paid"
+                        st.rerun()
+                with col2:
+                    btn_type = "primary" if st.session_state.transaction_type == "Received" else "secondary"
+                    if st.button("RECEIVED", use_container_width=True, type=btn_type, key="btn_received"):
+                        st.session_state.transaction_type = "Received"
+                        st.rerun()
 
-        # Group responses by segment
-        for segment in df['Segment'].unique().tolist():
-            with st.expander(f"📋 {segment}", expanded=False):
-                segment_responses = {k: v for k, v in all_responses.items() if v['segment'] == segment}
+                # Payment Mode Buttons - Hardcoded 2x2 layout (2 rows, 2 columns)
+                st.subheader("Payment Mode")
 
-                for key, resp_data in segment_responses.items():
-                    question = resp_data['question']
-                    answer = resp_data['answer']
+                # Row 1: Online and GPay
+                col1, col2 = st.columns([1, 1])
+                with col1:
+                    btn_type = "primary" if st.session_state.payment_mode == "Online" else "secondary"
+                    if st.button("Online", use_container_width=True, type=btn_type, key="btn_online"):
+                        st.session_state.payment_mode = "Online"
+                        st.rerun()
+                with col2:
+                    btn_type = "primary" if st.session_state.payment_mode == "GPay" else "secondary"
+                    if st.button("GPay", use_container_width=True, type=btn_type, key="btn_gpay"):
+                        st.session_state.payment_mode = "GPay"
+                        st.rerun()
 
-                    # Display question and answer with small font
-                    st.markdown(f"""
-                    <div style="margin-bottom: 15px;">
-                        <p style="font-size: 0.85rem; margin-bottom: 3px; color: #333;"><strong>Q:</strong> {question}</p>
-                        <p style="font-size: 0.75rem; color: #666; margin-left: 15px;"><strong>A:</strong> {answer}</p>
-                    </div>
-                    """, unsafe_allow_html=True)
+                # Row 2: PhonePe and Cash
+                col3, col4 = st.columns([1, 1])
+                with col3:
+                    btn_type = "primary" if st.session_state.payment_mode == "PhonePe" else "secondary"
+                    if st.button("PhonePe", use_container_width=True, type=btn_type, key="btn_phone"):
+                        st.session_state.payment_mode = "PhonePe"
+                        st.rerun()
+                with col4:
+                    btn_type = "primary" if st.session_state.payment_mode == "Cash" else "secondary"
+                    if st.button("Cash", use_container_width=True, type=btn_type, key="btn_cash"):
+                        st.session_state.payment_mode = "Cash"
+                        st.rerun()
 
-        st.markdown("---")
-        st.subheader("Download Report")
-        # Generate PDF with spinner animation
-        with st.spinner('Generating PDF...'):
-            file_path = generate_pdf(summary, segment_scores, overall_score, overall_tag, st.session_state.user_data, all_responses, df)
+                st.markdown("")  # spacing
 
-        with open(file_path, "rb") as f:
-            st.download_button(
-                "Download Full PDF Report",
-                f,
-                file_name=f"AI_Maturity_Report_{st.session_state.user_data['name'].replace(' ', '_')}.pdf",
-                mime="application/pdf",
-                type="primary",
-                use_container_width=True
-            )
+                # Submit button
+                if st.button("Submit Transaction", use_container_width=True, type="primary", key="btn_submit"):
+                    if not name:
+                        st.error("Please enter a name")
+                    elif amount <= 0:
+                        st.error("Please enter a valid amount")
+                    elif not st.session_state.transaction_type:
+                        st.error("Please select type (Paid or Received)")
+                    elif not st.session_state.payment_mode:
+                        st.error("Please select payment mode")
+                    else:
+                        if add_transaction(trans_sheet, name, description, amount, st.session_state.transaction_type, st.session_state.payment_mode, st.session_state.username):
+                            st.session_state.show_success = True
+                            st.session_state.transaction_type = None
+                            st.session_state.payment_mode = None
+                            st.session_state.name_input = ""
+                            st.session_state.amount_input = 0.0
+                            st.session_state.description_input = ""
+                            st.rerun()
+
+                # Show success message right after submit button
+                if st.session_state.show_success:
+                    st.success("Transaction submitted successfully!")
+                    st.session_state.show_success = False
+
+            with tab2:
+                st.header("Download Statement")
+                st.write("Select date range to download your statement")
+                col1, col2 = st.columns(2)
+                with col1:
+                    start_date = st.date_input("Start Date", value=datetime.now().date() - timedelta(days=30), max_value=datetime.now().date(), key="start_date")
+                with col2:
+                    end_date = st.date_input("End Date", value=datetime.now().date(), max_value=datetime.now().date(), key="end_date")
+
+                if start_date > end_date:
+                    st.error("Start date must be before end date")
+                else:
+                    if not user_df.empty:
+                        user_df['Date'] = pd.to_datetime(user_df['Timestamp']).dt.date
+                        filtered_df = user_df[(user_df['Date'] >= start_date) & (user_df['Date'] <= end_date)]
+                        if not filtered_df.empty:
+                            total_paid = filtered_df[filtered_df['Type'] == 'Paid']['Amount'].sum()
+                            total_received = filtered_df[filtered_df['Type'] == 'Received']['Amount'].sum()
+                            balance = total_received - total_paid
+                            st.subheader("Summary")
+                            col1, col2, col3 = st.columns(3)
+                            with col1:
+                                st.metric("Total Paid", f"₹{total_paid:,.0f}")
+                            with col2:
+                                st.metric("Total Received", f"₹{total_received:,.0f}")
+                            with col3:
+                                st.metric("Net Balance", f"₹{balance:,.0f}")
+                            st.markdown("---")
+                            st.subheader(f"All Entries ({len(filtered_df)} total)")
+                            for idx, row in filtered_df.sort_values('Timestamp', ascending=False).iterrows():
+                                type_emoji = "" if row['Type'] == 'Paid' else ""
+                                amount_color = "red" if row['Type'] == 'Paid' else "green"
+                                desc_value = row.get('Description', row.get('Notes', ''))
+                                with st.container():
+                                    col1, col2 = st.columns([3, 1])
+                                    with col1:
+                                        st.markdown(f"**{row['Name']}**")
+                                        st.caption(f"{row['Payment Mode']} • {row['Timestamp'].strftime('%d %b %Y %I:%M %p')}")
+                                        if desc_value:
+                                            st.caption(f"{desc_value}")
+                                    with col2:
+                                        st.markdown(f"**<span style='color:{amount_color}'>₹{row['Amount']:,.0f}</span>**", unsafe_allow_html=True)
+                                    st.markdown("---")
+                            pdf_buffer = create_pdf_statement(filtered_df, start_date, end_date, st.session_state.username, st.session_state.is_admin)
+                            st.download_button(label="Download as PDF", data=pdf_buffer, file_name=f"statement_{start_date}_{end_date}.pdf", mime="application/pdf", use_container_width=True)
+                        else:
+                            st.info("No entries found in selected date range.")
+                    else:
+                        st.info("No entries available.")
+
+            if st.session_state.is_admin:
+                with tab3:
+                    st.header("User Summary")
+                    st.write("View summary of all users")
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        admin_start_date = st.date_input("Start Date", value=datetime.now().date() - timedelta(days=30), max_value=datetime.now().date(), key="admin_start_date")
+                    with col2:
+                        admin_end_date = st.date_input("End Date", value=datetime.now().date(), max_value=datetime.now().date(), key="admin_end_date")
+
+                    if admin_start_date > admin_end_date:
+                        st.error("Start date must be before end date")
+                    else:
+                        if not df.empty:
+                            user_summary_df = get_user_summary(df, admin_start_date, admin_end_date)
+                            if not user_summary_df.empty:
+                                st.subheader(f"Summary from {admin_start_date.strftime('%d %b %Y')} to {admin_end_date.strftime('%d %b %Y')}")
+                                st.dataframe(user_summary_df.style.format({'Paid': '₹{:,.0f}', 'Received': '₹{:,.0f}', 'Balance': '₹{:,.0f}'}), use_container_width=True, hide_index=True)
+                                st.markdown("---")
+                                st.subheader("Overall Totals")
+                                col1, col2, col3 = st.columns(3)
+                                with col1:
+                                    st.metric("Total Paid (All Users)", f"₹{user_summary_df['Paid'].sum():,.0f}")
+                                with col2:
+                                    st.metric("Total Received (All Users)", f"₹{user_summary_df['Received'].sum():,.0f}")
+                                with col3:
+                                    st.metric("Total Balance", f"₹{user_summary_df['Balance'].sum():,.0f}")
+                            else:
+                                st.info("No transactions found in selected date range.")
+                        else:
+                            st.info("No transactions available.")
+        else:
+            st.error("Could not access transactions sheet")
+    else:
+        st.error("Failed to connect to Google Sheets. Please check your configuration.")
