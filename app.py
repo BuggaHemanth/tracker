@@ -669,28 +669,52 @@ st.markdown(
        Only targets the specific logout button
        ============================================ */
 
-    /* Logout button - specific selector using key attribute */
-    .stButton:has(button[key="logout_btn"]) {{
-        display: inline-flex !important;
+    /* Logout row - prevent grid layout, use flex instead */
+    div[data-testid="stHorizontalBlock"]:has(button[key="logout_btn"]) {{
+        display: flex !important;
+        grid-template-columns: none !important;
         justify-content: flex-end !important;
-        width: auto !important;
+        padding: 2% !important;
+        margin-top: 1% !important;
+        background: #f8f9fa !important;
+        border-bottom: 1px solid #e0e0e0 !important;
     }}
 
+    /* Make logout column wider */
+    div[data-testid="stHorizontalBlock"]:has(button[key="logout_btn"]) > div[data-testid="column"]:last-child {{
+        min-width: 100px !important;
+        flex: 0 0 auto !important;
+    }}
+
+    /* Hide the empty left column in logout row */
+    div[data-testid="stHorizontalBlock"]:has(button[key="logout_btn"]) > div[data-testid="column"]:first-child {{
+        display: none !important;
+    }}
+
+    /* Logout button container */
+    .stButton:has(button[key="logout_btn"]) {{
+        display: flex !important;
+        justify-content: flex-end !important;
+        width: 100% !important;
+    }}
+
+    /* Logout button styling - Light Orange */
     .stButton > button[key="logout_btn"] {{
-        padding: 2.5% 5% !important;
-        font-size: 14px !important;
-        min-height: 40px !important;
-        background: #ffb347 !important;
-        color: white !important;
-        border: 2px solid #ff9933 !important;
+        padding: 8px 20px !important;
+        font-size: 13px !important;
+        min-height: 36px !important;
+        min-width: 80px !important;
+        background: #FFD699 !important;
+        color: #333 !important;
+        border: 1px solid #FFB84D !important;
         border-radius: 6px !important;
         cursor: pointer !important;
         white-space: nowrap !important;
-        font-weight: 700 !important;
+        font-weight: 600 !important;
         display: inline-block !important;
         visibility: visible !important;
         opacity: 1 !important;
-        box-shadow: 0 2px 4px rgba(255, 153, 51, 0.3) !important;
+        box-shadow: 0 2px 4px rgba(255, 180, 77, 0.3) !important;
         width: auto !important;
         max-width: none !important;
         margin: 0 !important;
@@ -698,9 +722,9 @@ st.markdown(
     }}
 
     .stButton > button[key="logout_btn"]:hover {{
-        background: #ff9933 !important;
-        transform: scale(1.05) !important;
-        box-shadow: 0 4px 8px rgba(255, 153, 51, 0.5) !important;
+        background: #FFB84D !important;
+        transform: scale(1.02) !important;
+        box-shadow: 0 4px 8px rgba(255, 180, 77, 0.4) !important;
     }}
 
     </style>
@@ -843,9 +867,12 @@ if not st.session_state.logged_in:
         st.error("Could not connect to Google Sheets")
 
 else:
-    # Logout button at top right - using container with CSS positioning
-    logout_container = st.container()
-    with logout_container:
+    # Add top spacing to avoid Streamlit's hidden header
+    st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+
+    # Logout button at top right using columns
+    logout_col1, logout_col2 = st.columns([3, 1])
+    with logout_col2:
         if st.button("Logout", key="logout_btn", type="secondary"):
             st.session_state.logged_in = False
             st.session_state.username = ""
@@ -872,9 +899,6 @@ else:
             if not df.empty and not st.session_state.is_admin:
                 user_df = df[df["User"] == st.session_state.username]
 
-            # Welcome message
-            st.markdown(f"### Welcome, {st.session_state.display_name}!")
-
             # TODAY'S KPI BOXES - Paid and Received side by side, Balance below
             st.markdown("#### Today's Summary")
             today_paid, today_received, today_balance = get_today_stats(
@@ -884,21 +908,23 @@ else:
             col1, col2 = st.columns(2)
             with col1:
                 st.markdown(
-                    f"""<div style="background:#ffe6e6; padding:3%; border-radius:4px; border-left:4px solid #dc3545;
-                    display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:70px;
+                    f"""<div style="background:#ffe6e6; padding:12px 8px; border-radius:4px; border-left:4px solid #dc3545;
+                    display:flex; flex-direction:column; justify-content:center; align-items:center;
+                    height:70px; box-sizing:border-box; text-align:center;
                     font-family:{APP_FONT_FAMILY};">
-                    <span style="font-size:11px; color:#666; font-family:{APP_FONT_FAMILY};">PAID</span>
-                    <span style="font-size:18px; font-weight:bold; color:#dc3545; font-family:{APP_FONT_FAMILY};">₹{today_paid:,.0f}</span>
+                    <span style="font-size:11px; color:#666; font-family:{APP_FONT_FAMILY}; line-height:1.2; margin-bottom:4px;">PAID</span>
+                    <span style="font-size:18px; font-weight:bold; color:#dc3545; font-family:{APP_FONT_FAMILY}; line-height:1.2;">₹{today_paid:,.0f}</span>
                     </div>""",
                     unsafe_allow_html=True,
                 )
             with col2:
                 st.markdown(
-                    f"""<div style="background:#e6ffe6; padding:3%; border-radius:4px; border-left:4px solid #28a745;
-                    display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:70px;
+                    f"""<div style="background:#e6ffe6; padding:12px 8px; border-radius:4px; border-left:4px solid #28a745;
+                    display:flex; flex-direction:column; justify-content:center; align-items:center;
+                    height:70px; box-sizing:border-box; text-align:center;
                     font-family:{APP_FONT_FAMILY};">
-                    <span style="font-size:11px; color:#666; font-family:{APP_FONT_FAMILY};">RECEIVED</span>
-                    <span style="font-size:18px; font-weight:bold; color:#28a745; font-family:{APP_FONT_FAMILY};">₹{today_received:,.0f}</span>
+                    <span style="font-size:11px; color:#666; font-family:{APP_FONT_FAMILY}; line-height:1.2; margin-bottom:4px;">RECEIVED</span>
+                    <span style="font-size:18px; font-weight:bold; color:#28a745; font-family:{APP_FONT_FAMILY}; line-height:1.2;">₹{today_received:,.0f}</span>
                     </div>""",
                     unsafe_allow_html=True,
                 )
@@ -906,11 +932,12 @@ else:
             balance_color = "#28a745" if today_balance >= 0 else "#dc3545"
             balance_bg = "#e6ffe6" if today_balance >= 0 else "#ffe6e6"
             st.markdown(
-                f"""<div style="background:{balance_bg}; padding:3%; border-radius:4px; border-left:4px solid {balance_color}; margin-top:2%;
-                display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:70px;
+                f"""<div style="background:{balance_bg}; padding:12px 8px; border-radius:4px; border-left:4px solid {balance_color}; margin-top:8px;
+                display:flex; flex-direction:column; justify-content:center; align-items:center;
+                height:70px; box-sizing:border-box; text-align:center;
                 font-family:{APP_FONT_FAMILY};">
-                <span style="font-size:11px; color:#666; font-family:{APP_FONT_FAMILY};">NET BALANCE</span>
-                <span style="font-size:18px; font-weight:bold; color:{balance_color}; font-family:{APP_FONT_FAMILY};">₹{today_balance:,.0f}</span>
+                <span style="font-size:11px; color:#666; font-family:{APP_FONT_FAMILY}; line-height:1.2; margin-bottom:4px;">NET BALANCE</span>
+                <span style="font-size:18px; font-weight:bold; color:{balance_color}; font-family:{APP_FONT_FAMILY}; line-height:1.2;">₹{today_balance:,.0f}</span>
                 </div>""",
                 unsafe_allow_html=True,
             )
@@ -1051,7 +1078,6 @@ else:
                     missing_fields.append("Type")
                 if not st.session_state.payment_mode:
                     missing_fields.append("Payment Mode")
-
 
                 # Submit button
                 submit_disabled = len(missing_fields) > 0
