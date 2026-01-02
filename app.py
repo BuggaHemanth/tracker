@@ -298,19 +298,33 @@ def create_pdf_statement(df, start_date, end_date, username, is_admin):
 st.markdown(
     """
     <style>
+    /* Universal box-sizing and overflow prevention */
+    * {
+        box-sizing: border-box !important;
+    }
+
+    html, body {
+        overflow-x: hidden !important;
+        width: 100% !important;
+    }
+
     /* Main background - Navy Blue RGB(0,0,104) */
     .stApp {
         background: rgb(0, 0, 104);
+        overflow-x: hidden !important;
+        width: 100% !important;
     }
 
-    /* Content area - Mobile-like layout on all screens */
+    /* Content area - Responsive mobile-like layout */
     .block-container {
         background-color: #ffffff;
         border-radius: 10px;
-        padding: 0.8rem !important;
-        padding-top: 1rem !important;
-        max-width: 500px !important;
+        padding: 1rem !important;
+        width: 100% !important;
+        max-width: min(95vw, 500px) !important;
         margin: 0 auto !important;
+        overflow-x: hidden !important;
+        box-sizing: border-box !important;
     }
 
     /* Headers */
@@ -326,17 +340,20 @@ st.markdown(
         color: rgb(0, 0, 104) !important;
     }
 
-    /* Buttons - Responsive and compact */
+    /* Buttons - Fully responsive */
     .stButton > button {
-        width: 100%;
-        height: 42px !important;
-        font-size: 13px !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 42px !important;
+        font-size: clamp(11px, 2.5vw, 13px) !important;
         font-weight: bold;
         margin: 2px 0 !important;
-        padding: 8px 12px !important;
+        padding: 10px 8px !important;
         border-radius: 6px;
         transition: all 0.1s ease;
         white-space: nowrap;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
     }
 
     /* Primary buttons - Navy Blue RGB(0,0,104) */
@@ -373,6 +390,8 @@ st.markdown(
         padding: 8px !important;
         border: 2px solid #99ccff !important;
         border-radius: 6px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
 
     .stTextInput > div > div > input:focus,
@@ -385,49 +404,57 @@ st.markdown(
     .stTextInput,
     .stNumberInput {
         margin-bottom: 8px !important;
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
 
-    /* Metric cards - Compact and responsive */
+    /* Metric cards - Fully responsive */
     [data-testid="stMetric"] {
         background: #e6f2ff;
-        padding: 8px !important;
+        padding: 0.5rem !important;
         border-radius: 8px;
         border: 2px solid #99ccff;
-        margin-bottom: 8px !important;
+        margin-bottom: 0.5rem !important;
+        box-sizing: border-box !important;
+        width: 100% !important;
     }
 
     [data-testid="stMetricValue"] {
-        font-size: 18px !important;
+        font-size: clamp(16px, 4vw, 18px) !important;
         font-weight: bold !important;
         color: rgb(0, 0, 104) !important;
     }
 
     [data-testid="stMetricLabel"] {
-        font-size: 11px !important;
+        font-size: clamp(10px, 2.5vw, 11px) !important;
         color: rgb(0, 0, 104) !important;
         font-weight: 600 !important;
     }
 
-    /* Force columns to stay side by side on mobile */
+    /* Force columns to stay side by side - mobile responsive */
     [data-testid="column"] {
         min-width: 0 !important;
-        flex: 1 !important;
+        flex: 1 1 0 !important;
+        max-width: 50% !important;
     }
 
     /* Prevent columns from stacking on mobile */
     div[data-testid="column"]:first-child {
-        padding-right: 3px !important;
+        padding-right: 2px !important;
+        padding-left: 0 !important;
     }
 
     div[data-testid="column"]:last-child {
-        padding-left: 3px !important;
+        padding-left: 2px !important;
+        padding-right: 0 !important;
     }
 
     /* Force horizontal layout for columns */
     .row-widget.stHorizontal {
         display: flex !important;
         flex-direction: row !important;
-        gap: 6px !important;
+        gap: 4px !important;
+        width: 100% !important;
     }
 
     /* Ensure columns parent container stays horizontal */
@@ -435,6 +462,8 @@ st.markdown(
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
+        width: 100% !important;
+        overflow: visible !important;
     }
 
     /* Tabs - Reduced spacing */
@@ -475,9 +504,11 @@ st.markdown(
         border-radius: 6px !important;
     }
 
-    /* Column spacing - Tighter for mobile */
+    /* Column spacing - Responsive */
     div[data-testid="column"] {
-        padding: 0px 3px !important;
+        padding: 0 2px !important;
+        box-sizing: border-box !important;
+        min-width: 0 !important;
     }
 
     /* Ensure subheaders are visible */
@@ -486,9 +517,16 @@ st.markdown(
         margin-bottom: 6px !important;
     }
 
-    /* Force button columns to be equal width */
+    /* Force button columns to be equal width and fit */
     [data-testid="column"] > div {
         width: 100% !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Prevent column overflow */
+    div[data-testid="stHorizontalBlock"] {
+        width: 100% !important;
+        box-sizing: border-box !important;
     }
 
     /* Success/Error messages */
@@ -516,6 +554,37 @@ st.markdown(
 
     /* Hide sidebar */
     section[data-testid="stSidebar"] { display: none; }
+
+    /* Mobile-specific overrides for small screens */
+    @media (max-width: 480px) {
+        .block-container {
+            padding: 0.75rem !important;
+            max-width: 100vw !important;
+            width: 100% !important;
+        }
+
+        .stButton > button {
+            font-size: 11px !important;
+            padding: 8px 4px !important;
+            min-height: 38px !important;
+        }
+
+        [data-testid="stMetricValue"] {
+            font-size: 14px !important;
+        }
+
+        [data-testid="stMetricLabel"] {
+            font-size: 9px !important;
+        }
+
+        div[data-testid="column"] {
+            padding: 0 1px !important;
+        }
+
+        h1 { font-size: 18px !important; }
+        h2 { font-size: 16px !important; }
+        h3 { font-size: 14px !important; }
+    }
     </style>
     """,
     unsafe_allow_html=True,
