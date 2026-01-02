@@ -303,15 +303,10 @@ st.markdown(
         box-sizing: border-box !important;
     }
 
-    html, body {
-        overflow-x: hidden !important;
-        width: 100% !important;
-    }
-
     /* Main background - Navy Blue RGB(0,0,104) */
     .stApp {
         background: rgb(0, 0, 104);
-        overflow-x: hidden !important;
+        overflow-x: visible !important;
         width: 100% !important;
     }
 
@@ -323,7 +318,7 @@ st.markdown(
         width: 100% !important;
         max-width: 100vw !important;
         margin: 0 auto !important;
-        overflow-x: hidden !important;
+        overflow-x: visible !important;
         box-sizing: border-box !important;
     }
 
@@ -702,6 +697,32 @@ st.markdown(
     text-overflow: ellipsis !important;
     }
 
+        /* FINAL OVERRIDE – MUST BE LAST */
+    div[data-testid="stHorizontalBlock"] {
+        overflow-x: visible !important;
+    }
+    
+    div[data-testid="column"] {
+        flex: 0 0 50% !important;
+        width: 50% !important;
+        max-width: 50% !important;
+        min-width: 0 !important;
+    }
+    
+    [data-testid="column"] .stButton {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+    
+    .stButton > button {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        font-size: 9px !important;
+        padding: 4px 2px !important;
+        white-space: nowrap !important;
+    }
 
     
     </style>
