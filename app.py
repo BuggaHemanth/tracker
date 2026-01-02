@@ -45,9 +45,12 @@ def get_google_sheet():
 def get_transactions_sheet(spreadsheet):
     """Get transactions sheet"""
     try:
-        return spreadsheet.sheet1
+        sheet = spreadsheet.sheet1
+        # Test if sheet is accessible by getting row count
+        _ = sheet.row_count
+        return sheet
     except Exception as e:
-        st.error(f"Error getting transactions sheet: {e}")
+        st.error(f"Could not access transactions sheet: {e}")
         return None
 
 
@@ -308,16 +311,18 @@ st.markdown(
         background: rgb(0, 0, 104);
         overflow-x: visible !important;
         width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
 
     /* Content area - MOBILE-FIRST responsive layout */
     .block-container {
         background-color: #ffffff;
-        border-radius: 8px;
-        padding: 0.2rem !important;
+        border-radius: 0px !important;
+        padding: 0rem !important;
         width: 100% !important;
         max-width: 100vw !important;
-        margin: 0 auto !important;
+        margin: 0 !important;
         overflow-x: visible !important;
         box-sizing: border-box !important;
     }
@@ -326,12 +331,15 @@ st.markdown(
     @media (min-width: 500px) {
         .block-container {
             max-width: 500px !important;
+            padding: 0rem !important;
         }
     }
 
     /* Headers */
     h1, h2, h3 {
         color: rgb(0, 0, 104) !important;
+        padding-left: 4px !important;
+        padding-right: 4px !important;
     }
     h1 { font-size: 22px !important; margin: 5px 0 !important; }
     h2 { font-size: 18px !important; margin: 10px 0 5px 0 !important; }
@@ -348,9 +356,12 @@ st.markdown(
         white-space: normal !important;     /* allow wrap */
         overflow: visible !important;
         text-overflow: unset !important;
-        line-height: 1.1 !important;
-        font-size: 9px !important;          /* keep small */
-        padding: 6px 2px !important;
+        line-height: 1.2 !important;
+        font-size: 10px !important;          /* slightly larger for readability */
+        padding: 8px 2px !important;
+        box-sizing: border-box !important;
+        margin: 0 !important;
+        border-radius: 0px !important;
     }
 
     /* Primary buttons - Navy Blue RGB(0,0,104) */
@@ -379,6 +390,7 @@ st.markdown(
         font-weight: 600 !important;
         font-size: 13px !important;
         margin-bottom: 3px !important;
+        padding-left: 4px !important;
     }
 
     .stTextInput > div > div > input,
@@ -405,15 +417,19 @@ st.markdown(
         width: 100% !important;
         max-width: 100% !important;
         box-sizing: border-box !important;
+        padding-left: 4px !important;
+        padding-right: 4px !important;
     }
 
     /* Metric cards - Fully responsive and fit within column */
     [data-testid="stMetric"] {
         background: #e6f2ff;
-        padding: 4px !important;
-        border-radius: 4px;
-        border: 1px solid #99ccff;
+        padding: 8px !important;
+        border-radius: 0px;
+        border: 0.5px solid #99ccff;
         margin-bottom: 0.5rem !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
         box-sizing: border-box !important;
         width: 100% !important;
         max-width: 100% !important;
@@ -443,8 +459,11 @@ st.markdown(
         width: 100% !important;
         max-width: 100% !important;
         overflow-x: visible !important; /* KEY FIX */
+        gap: 0px !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
-    
+
     /* Force exact 50/50 columns */
     div[data-testid="column"] {
         flex: 0 0 50% !important;
@@ -452,7 +471,7 @@ st.markdown(
         max-width: 50% !important;
         min-width: 0 !important;        /* CRITICAL */
         box-sizing: border-box !important;
-        padding: 2px !important;
+        padding: 0px !important;
     }
 
 
@@ -566,10 +585,23 @@ st.markdown(
         margin: 0 !important;
     }
 
+    /* Remove all padding from element containers */
+    .element-container {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
     /* Ensure main container has no extra padding */
     .main .block-container {
-        padding-left: 0.2rem !important;
-        padding-right: 0.2rem !important;
+        padding-left: 0rem !important;
+        padding-right: 0rem !important;
+        padding-top: 0rem !important;
+        padding-bottom: 0rem !important;
+    }
+
+    /* Remove default Streamlit padding */
+    .main {
+        padding: 0 !important;
     }
 
     /* Success/Error messages */
@@ -601,17 +633,29 @@ st.markdown(
     /* PORTRAIT MODE: Very narrow screens (phones in portrait) */
     @media (max-width: 600px) {
         .block-container {
-            padding: 0.2rem !important;
+            padding: 0rem !important;
             max-width: 100vw !important;
             width: 100% !important;
         }
 
-        /* Ultra-compact buttons for portrait */
+        /* Ultra-compact buttons for portrait - EXCEPT login buttons */
         .stButton > button {
-            font-size: 9px !important;
-            padding: 2px 1px !important;
-            min-height: 26px !important;
-            margin: 1px 0 !important;
+            font-size: 10px !important;
+            padding: 8px 2px !important;
+            min-height: 32px !important;
+            margin: 0 !important;
+            border-radius: 0px !important;
+        }
+
+        /* EXCEPTION: Keep login buttons normal size even in portrait */
+        button[data-testid*="baseButton"][kind="primary"],
+        [data-testid="column"]:has(button[key*="login"]) .stButton > button,
+        [data-testid="column"]:has(button[key*="register"]) .stButton > button,
+        [data-testid="column"]:has(button[key*="account"]) .stButton > button {
+            padding: 12px 16px !important;
+            font-size: 14px !important;
+            min-height: 42px !important;
+            margin: 4px 0 !important;
         }
 
         /* Smaller metrics for portrait */
@@ -625,6 +669,8 @@ st.markdown(
 
         [data-testid="stMetric"] {
             padding: 4px !important;
+            margin-left: 0 !important;
+            margin-right: 0 !important;
         }
 
     /* Force true 50% columns */
@@ -634,7 +680,7 @@ st.markdown(
         max-width: 50% !important;
         min-width: 0 !important;          /* 🔑 allows shrinking */
         box-sizing: border-box !important;
-        padding: 2px !important;
+        padding: 0px !important;
     }
 
 
@@ -651,12 +697,20 @@ st.markdown(
         .stTextInput, .stNumberInput {
             margin-bottom: 4px !important;
         }
+
+        /* EXCEPTION: Login page inputs need normal size */
+        .stTextInput:has(input[key*="login"]) input,
+        .stTextInput:has(input[key*="register"]) input {
+            font-size: 16px !important;
+            padding: 10px !important;
+            min-height: 40px !important;
+        }
     }
 
     /* LANDSCAPE MODE: Wider screens (landscape phones, tablets, desktop) */
     @media (min-width: 601px) {
         div[data-testid="stHorizontalBlock"] {
-            gap: 4px !important;
+            gap: 0px !important;
         }
 
     /* Force true 50% columns */
@@ -666,7 +720,7 @@ st.markdown(
         max-width: 50% !important;
         min-width: 0 !important;          /* 🔑 allows shrinking */
         box-sizing: border-box !important;
-        padding: 2px !important;
+        padding: 0px !important;
     }
 
 
@@ -689,32 +743,33 @@ st.markdown(
     max-width: 100% !important;
     min-width: 0 !important;
 
-    padding: 6px 4px !important;
+    padding: 8px 2px !important;
     font-size: 10px !important;
 
-    white-space: nowrap !important;
-    overflow: hidden !important;
-    text-overflow: ellipsis !important;
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    border-radius: 0px !important;
     }
 
         /* FINAL OVERRIDE – MUST BE LAST */
     div[data-testid="stHorizontalBlock"] {
         overflow-x: visible !important;
     }
-    
+
     div[data-testid="column"] {
         flex: 0 0 50% !important;
         width: 50% !important;
         max-width: 50% !important;
         min-width: 0 !important;
     }
-    
+
     [data-testid="column"] .stButton {
         width: 100% !important;
         max-width: 100% !important;
         min-width: 0 !important;
     }
-    
+
     .stButton > button {
         width: 100% !important;
         max-width: 100% !important;
@@ -737,7 +792,7 @@ st.markdown(
     grid-template-columns: 1fr 1fr !important;
     width: 100% !important;
     max-width: 100% !important;
-    overflow-x: hidden !important;
+    overflow-x: visible !important;
     }
 
     /* =========================================================
@@ -754,7 +809,7 @@ div[data-testid="stHorizontalBlock"] {
     gap: 0 !important;
     overflow-x: hidden !important;
 }
-    
+
     /* Columns must fully fit grid cell */
     div[data-testid="column"] {
         width: 100% !important;
@@ -764,46 +819,71 @@ div[data-testid="stHorizontalBlock"] {
         margin: 0 !important;
         box-sizing: border-box !important;
     }
-    
+
     /* Button containers */
     [data-testid="column"] .stButton {
         width: 100% !important;
         max-width: 100% !important;
         min-width: 0 !important;
     }
-    
+
     /* Actual buttons */
     .stButton > button {
         width: 100% !important;
         max-width: 100% !important;
         box-sizing: border-box !important;
-        padding: 4px 2px !important;
-        font-size: 9px !important;
-        white-space: nowrap !important;
+        padding: 8px 2px !important;
+        font-size: 10px !important;
+        white-space: normal !important;
+        border-radius: 0px !important;
+    }
+
+    /* FIX: Login/Register buttons need normal sizing for clickability */
+    button[data-testid*="baseButton"][kind="primary"],
+    .stButton > button:first-child {
+        padding: 12px 20px !important;
+        font-size: 15px !important;
+        min-height: 44px !important;
+    }
+
+    /* Specifically target login page buttons */
+    [data-testid="column"]:has(button[key*="login"]) .stButton > button,
+    [data-testid="column"]:has(button[key*="register"]) .stButton > button,
+    [data-testid="column"]:has(button[key*="account"]) .stButton > button {
+        padding: 12px 20px !important;
+        font-size: 15px !important;
+        min-height: 44px !important;
     }
 
         /* === KPI ROW (Paid / Received) === */
     div[data-testid="stHorizontalBlock"]:has([data-testid="stMetric"]) {
         display: grid !important;
         grid-template-columns: 1fr 1fr !important;
-        gap: 6px !important;            /* 👈 small controlled gap */
+        gap: 1px !important;            /* 👈 1px gap to separate cards */
         width: 100% !important;
         max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
     }
-    
+
     /* === PAYMENT MODE BUTTON GRID (2x2) === */
     div[data-testid="stHorizontalBlock"]:has(button) {
-        gap: 4px !important;        /* 👈 reduce horizontal gap */
+        gap: 0px !important;        /* 👈 no gap for full width */
+        margin: 0 !important;
+        padding: 0 !important;
     }
-    
+
     [data-testid="column"] {
         padding: 0 !important;      /* remove extra space */
+        margin: 0 !important;
     }
-    
+
     .stButton {
-        margin-bottom: 4px !important;
+        margin-bottom: 2px !important;
+        margin-left: 0 !important;
+        margin-right: 0 !important;
     }
-    
+
     /* === STICKY LOGOUT BUTTON === */
     .logout-bar {
         position: sticky;
@@ -815,7 +895,55 @@ div[data-testid="stHorizontalBlock"] {
         justify-content: flex-end;
     }
 
-    
+    /* ============================================
+       FINAL OVERRIDE: LOGIN BUTTONS MUST BE CLICKABLE
+       This rule must be LAST to override all others
+       ============================================ */
+    button[key="login_btn"],
+    button[key="register_btn"],
+    button[key="create_account_btn"],
+    button[key="back_login_btn"],
+    [data-testid="column"]:nth-child(1) > div > div > div > button[kind="primary"]:first-of-type,
+    [data-testid="column"]:nth-child(2) > div > div > div > button {
+        padding: 12px 20px !important;
+        font-size: 15px !important;
+        min-height: 44px !important;
+        margin: 4px 0 !important;
+        white-space: normal !important;
+    }
+
+    /* Login page text inputs must be readable */
+    input[key="login_username"],
+    input[key="login_password"],
+    input[key="reg_name"],
+    input[key="reg_phone"],
+    input[key="reg_username"],
+    input[key="reg_password"],
+    input[key="reg_confirm_password"] {
+        font-size: 16px !important;
+        padding: 10px !important;
+        min-height: 42px !important;
+    }
+
+    /* ============================================
+       ABSOLUTE FINAL FIX: Ensure login buttons work
+       ============================================ */
+    /* Login button containers must be visible and clickable */
+    [data-testid="column"]:has(button[kind="primary"]) {
+        position: relative !important;
+        z-index: 100 !important;
+        overflow: visible !important;
+    }
+
+    /* Login buttons must be fully visible and clickable */
+    button[kind="primary"],
+    button[data-baseweb="button"] {
+        pointer-events: auto !important;
+        position: relative !important;
+        z-index: 101 !important;
+        cursor: pointer !important;
+    }
+
     </style>
     """,
     unsafe_allow_html=True,
@@ -957,26 +1085,24 @@ if not st.session_state.logged_in:
 
 else:
     # Logout button at top right
-   with st.container():
-    st.markdown(
-        """
+    with st.container():
+        st.markdown(
+            """
         <div class="logout-bar">
         """,
-        unsafe_allow_html=True,
-    )
+            unsafe_allow_html=True,
+        )
 
-    if st.button("Logout", key="logout_btn", type="secondary"):
-        st.session_state.logged_in = False
-        st.rerun()
+        if st.button("Logout", key="logout_btn", type="secondary"):
+            st.session_state.logged_in = False
+            st.session_state.username = ""
+            st.session_state.display_name = ""
+            st.session_state.is_admin = False
+            st.session_state.transaction_type = None
+            st.session_state.payment_mode = None
+            st.rerun()
 
-    st.markdown("</div>", unsafe_allow_html=True)
-    st.session_state.logged_in = False
-    st.session_state.username = ""
-    st.session_state.display_name = ""
-    st.session_state.is_admin = False
-    st.session_state.transaction_type = None
-    st.session_state.payment_mode = None
-    st.rerun()
+        st.markdown("</div>", unsafe_allow_html=True)
 
     spreadsheet = get_google_sheet()
     if spreadsheet:
@@ -1047,7 +1173,10 @@ else:
                         else "secondary"
                     )
                     if st.button(
-                        "PAID", use_container_width=True, type=btn_type, key="btn_paid"
+                        "PAID",
+                        use_container_width=True,
+                        type=btn_type,
+                        key="btn_paid",
                     ):
                         st.session_state.transaction_type = "Paid"
                         st.rerun()
@@ -1092,7 +1221,10 @@ else:
                         else "secondary"
                     )
                     if st.button(
-                        "GPay", use_container_width=True, type=btn_type, key="btn_gpay"
+                        "GPay",
+                        use_container_width=True,
+                        type=btn_type,
+                        key="btn_gpay",
                     ):
                         st.session_state.payment_mode = "GPay"
                         st.rerun()
@@ -1120,7 +1252,10 @@ else:
                         else "secondary"
                     )
                     if st.button(
-                        "Cash", use_container_width=True, type=btn_type, key="btn_cash"
+                        "Cash",
+                        use_container_width=True,
+                        type=btn_type,
+                        key="btn_cash",
                     ):
                         st.session_state.payment_mode = "Cash"
                         st.rerun()
@@ -1155,7 +1290,9 @@ else:
                             st.session_state.show_success = True
                             st.session_state.transaction_type = None
                             st.session_state.payment_mode = None
-                            st.session_state.refresh_data = True  # Trigger data refresh
+                            st.session_state.refresh_data = (
+                                True  # Trigger data refresh
+                            )
                             # Clear form fields by deleting the keys
                             if "name_field" in st.session_state:
                                 del st.session_state.name_field
@@ -1196,7 +1333,9 @@ else:
                         temp_df = (
                             user_df.copy()
                         )  # Avoid modifying the original dataframe
-                        temp_df["Date"] = pd.to_datetime(temp_df["Timestamp"]).dt.date
+                        temp_df["Date"] = pd.to_datetime(
+                            temp_df["Timestamp"]
+                        ).dt.date
                         filtered_df = temp_df[
                             (temp_df["Date"] >= start_date)
                             & (temp_df["Date"] <= end_date)
@@ -1214,7 +1353,9 @@ else:
                             with col1:
                                 st.metric("Total Paid", f"₹{total_paid:,.0f}")
                             with col2:
-                                st.metric("Total Received", f"₹{total_received:,.0f}")
+                                st.metric(
+                                    "Total Received", f"₹{total_received:,.0f}"
+                                )
                             with col3:
                                 st.metric("Net Balance", f"₹{balance:,.0f}")
                             st.markdown("---")
@@ -1324,10 +1465,14 @@ else:
                                         f"₹{user_summary_df['Balance'].sum():,.0f}",
                                     )
                             else:
-                                st.info("No transactions found in selected date range.")
+                                st.info(
+                                    "No transactions found in selected date range."
+                                )
                         else:
                             st.info("No transactions available.")
+            else:
+                st.error("Could not access transactions sheet")
         else:
-            st.error("Could not access transactions sheet")
-    else:
-        st.error("Failed to connect to Google Sheets. Please check your configuration.")
+            st.error(
+                "Failed to connect to Google Sheets. Please check your configuration."
+            )
