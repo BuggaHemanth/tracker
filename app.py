@@ -924,7 +924,6 @@ else:
                 tab1, tab2 = st.tabs(["New Entry", "Download Statement"])
 
             with tab1:
-                st.caption("Fields marked with * are required")
                 name = st.text_input(
                     "Name *",
                     placeholder="Enter person/vendor name",
@@ -938,7 +937,7 @@ else:
                     key="amount_field",
                 )
                 description = st.text_input(
-                    "Purpose (optional)",
+                    "Purpose",
                     placeholder="Add details...",
                     key="desc_field",
                 )
@@ -1053,8 +1052,6 @@ else:
                 if not st.session_state.payment_mode:
                     missing_fields.append("Payment Mode")
 
-                if missing_fields:
-                    st.warning(f"Please fill: {', '.join(missing_fields)}")
 
                 # Submit button
                 submit_disabled = len(missing_fields) > 0
