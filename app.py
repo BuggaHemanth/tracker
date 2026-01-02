@@ -321,15 +321,22 @@ st.markdown(
     h2 { font-size: 18px !important; margin: 10px 0 5px 0 !important; }
     h3 { font-size: 16px !important; margin: 5px 0 8px 0 !important; }
 
-    /* Buttons - Smaller for mobile */
+    /* Ensure all labels are visible */
+    label, .stMarkdown p {
+        color: rgb(0, 0, 104) !important;
+    }
+
+    /* Buttons - Responsive and compact */
     .stButton > button {
         width: 100%;
-        height: 50px !important;
-        font-size: 14px !important;
+        height: 42px !important;
+        font-size: 13px !important;
         font-weight: bold;
         margin: 2px 0 !important;
+        padding: 8px 12px !important;
         border-radius: 6px;
         transition: all 0.1s ease;
+        white-space: nowrap;
     }
 
     /* Primary buttons - Navy Blue RGB(0,0,104) */
@@ -351,11 +358,19 @@ st.markdown(
         box-shadow: 0 2px 8px rgba(0, 0, 104, 0.3) !important;
     }
 
-    /* Text inputs - Compact */
+    /* Text inputs - Compact with visible labels */
+    .stTextInput label,
+    .stNumberInput label {
+        color: rgb(0, 0, 104) !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+        margin-bottom: 4px !important;
+    }
+
     .stTextInput > div > div > input,
     .stNumberInput > div > div > input {
         font-size: 16px !important;
-        padding: 10px !important;
+        padding: 8px !important;
         border: 2px solid #99ccff !important;
         border-radius: 6px !important;
     }
@@ -366,25 +381,60 @@ st.markdown(
         box-shadow: 0 0 0 2px rgba(0, 0, 104, 0.2) !important;
     }
 
-    /* Metric cards - Compact */
+    /* Reduce spacing between input fields */
+    .stTextInput,
+    .stNumberInput {
+        margin-bottom: 8px !important;
+    }
+
+    /* Metric cards - Compact and responsive */
     [data-testid="stMetric"] {
         background: #e6f2ff;
-        padding: 10px !important;
+        padding: 8px !important;
         border-radius: 8px;
         border: 2px solid #99ccff;
         margin-bottom: 8px !important;
     }
 
     [data-testid="stMetricValue"] {
-        font-size: 20px !important;
+        font-size: 18px !important;
         font-weight: bold !important;
         color: rgb(0, 0, 104) !important;
     }
 
     [data-testid="stMetricLabel"] {
-        font-size: 12px !important;
+        font-size: 11px !important;
         color: rgb(0, 0, 104) !important;
         font-weight: 600 !important;
+    }
+
+    /* Force columns to stay side by side on mobile */
+    [data-testid="column"] {
+        min-width: 0 !important;
+        flex: 1 !important;
+    }
+
+    /* Prevent columns from stacking on mobile */
+    div[data-testid="column"]:first-child {
+        padding-right: 3px !important;
+    }
+
+    div[data-testid="column"]:last-child {
+        padding-left: 3px !important;
+    }
+
+    /* Force horizontal layout for columns */
+    .row-widget.stHorizontal {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 6px !important;
+    }
+
+    /* Ensure columns parent container stays horizontal */
+    div[data-testid="stHorizontalBlock"] {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
     }
 
     /* Tabs - Reduced spacing */
@@ -412,16 +462,28 @@ st.markdown(
         color: white !important;
     }
 
-    /* Date inputs */
+    /* Date inputs with visible labels */
+    .stDateInput label {
+        color: rgb(0, 0, 104) !important;
+        font-weight: 600 !important;
+        font-size: 14px !important;
+    }
+
     .stDateInput > div > div > input {
         font-size: 14px !important;
         border: 2px solid #99ccff !important;
         border-radius: 6px !important;
     }
 
-    /* Column spacing - Tighter */
+    /* Column spacing - Tighter for mobile */
     div[data-testid="column"] {
-        padding: 0px 4px !important;
+        padding: 0px 3px !important;
+    }
+
+    /* Ensure subheaders are visible */
+    .stMarkdown h2 {
+        margin-top: 8px !important;
+        margin-bottom: 6px !important;
     }
 
     /* Force button columns to be equal width */
