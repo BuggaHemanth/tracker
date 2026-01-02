@@ -315,16 +315,23 @@ st.markdown(
         width: 100% !important;
     }
 
-    /* Content area - Responsive mobile-like layout */
+    /* Content area - MOBILE-FIRST responsive layout */
     .block-container {
         background-color: #ffffff;
-        border-radius: 10px;
-        padding: 0.5rem !important;
+        border-radius: 8px;
+        padding: 0.4rem !important;
         width: 100% !important;
-        max-width: min(98vw, 500px) !important;
+        max-width: 100vw !important;
         margin: 0 auto !important;
         overflow-x: hidden !important;
         box-sizing: border-box !important;
+    }
+
+    /* Wider screens get constrained width */
+    @media (min-width: 500px) {
+        .block-container {
+            max-width: 500px !important;
+        }
     }
 
     /* Headers */
@@ -340,16 +347,16 @@ st.markdown(
         color: rgb(0, 0, 104) !important;
     }
 
-    /* Buttons - Fully responsive and fit within column */
+    /* MOBILE-FIRST: Buttons fit within column exactly */
     .stButton > button {
         width: 100% !important;
         max-width: 100% !important;
         height: auto !important;
-        min-height: 38px !important;
+        min-height: 36px !important;
         font-size: clamp(9px, 2vw, 11px) !important;
         font-weight: bold;
-        margin: 2px 0 !important;
-        padding: 6px 2px !important;
+        margin: 3px 0 !important;
+        padding: 8px 4px !important;
         border-radius: 4px;
         border-width: 1px !important;
         transition: none;
@@ -441,7 +448,7 @@ st.markdown(
         overflow-wrap: break-word !important;
     }
 
-    /* Match column container width to submit button width */
+    /* MOBILE-FIRST: Match column container width to submit button width */
     div[data-testid="stHorizontalBlock"] {
         display: flex !important;
         flex-direction: row !important;
@@ -449,19 +456,19 @@ st.markdown(
         width: 100% !important;
         max-width: 100% !important;
         overflow: hidden !important;
-        gap: 2px !important;
+        gap: 0px !important;
         box-sizing: border-box !important;
         padding: 0 !important;
         margin: 0 !important;
     }
 
-    /* Force columns to split available width perfectly in half */
+    /* MOBILE-FIRST: Force columns to be exactly 50% */
     [data-testid="column"] {
-        width: calc(50% - 1px) !important;
-        min-width: calc(50% - 1px) !important;
-        max-width: calc(50% - 1px) !important;
-        flex: 0 0 calc(50% - 1px) !important;
-        flex-basis: calc(50% - 1px) !important;
+        width: 50% !important;
+        min-width: 50% !important;
+        max-width: 50% !important;
+        flex: 0 0 50% !important;
+        flex-basis: 50% !important;
         flex-grow: 0 !important;
         flex-shrink: 0 !important;
         padding: 0 !important;
@@ -469,15 +476,17 @@ st.markdown(
         box-sizing: border-box !important;
     }
 
-    /* Remove all column spacing */
+    /* Remove ALL column spacing on mobile */
     div[data-testid="column"]:first-child {
         padding: 0 !important;
         margin: 0 !important;
+        border-right: 0.5px solid transparent !important;
     }
 
     div[data-testid="column"]:last-child {
         padding: 0 !important;
         margin: 0 !important;
+        border-left: 0.5px solid transparent !important;
     }
 
     div[data-testid="column"]:not(:first-child):not(:last-child) {
@@ -485,11 +494,11 @@ st.markdown(
         margin: 0 !important;
     }
 
-    /* Remove any layout gaps */
+    /* Remove any layout gaps on mobile */
     .row-widget.stHorizontal {
         display: flex !important;
         flex-direction: row !important;
-        gap: 2px !important;
+        gap: 0px !important;
         width: 100% !important;
         padding: 0 !important;
         margin: 0 !important;
@@ -563,11 +572,24 @@ st.markdown(
         box-sizing: border-box !important;
     }
 
-    /* Remove any default streamlit element spacing */
+    /* Remove ALL default streamlit element spacing */
     [data-testid="column"] .element-container {
         width: 100% !important;
+        max-width: 100% !important;
         padding: 0 !important;
         margin: 0 !important;
+    }
+
+    /* Remove Streamlit's default vertical rhythm */
+    [data-testid="column"] > div > div {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* Ensure main container has no extra padding */
+    .main .block-container {
+        padding-left: 0.4rem !important;
+        padding-right: 0.4rem !important;
     }
 
     /* Success/Error messages */
@@ -596,45 +618,75 @@ st.markdown(
     /* Hide sidebar */
     section[data-testid="stSidebar"] { display: none; }
 
-    /* Mobile-specific overrides for small screens */
-    @media (max-width: 480px) {
+    /* PORTRAIT MODE: Very narrow screens (phones in portrait) */
+    @media (max-width: 600px) {
         .block-container {
             padding: 0.4rem !important;
             max-width: 100vw !important;
             width: 100% !important;
         }
 
+        /* Ultra-compact buttons for portrait */
         .stButton > button {
             font-size: 9px !important;
-            padding: 6px 1px !important;
+            padding: 7px 2px !important;
             min-height: 34px !important;
+            margin: 2px 0 !important;
         }
 
+        /* Smaller metrics for portrait */
         [data-testid="stMetricValue"] {
-            font-size: 11px !important;
+            font-size: 12px !important;
         }
 
         [data-testid="stMetricLabel"] {
-            font-size: 7px !important;
+            font-size: 9px !important;
         }
 
         [data-testid="stMetric"] {
-            padding: 3px !important;
+            padding: 4px !important;
         }
 
+        /* Ensure 50/50 split in portrait */
         div[data-testid="column"] {
-            width: calc(50% - 1px) !important;
-            min-width: calc(50% - 1px) !important;
-            max-width: calc(50% - 1px) !important;
+            width: 50% !important;
+            min-width: 50% !important;
+            max-width: 50% !important;
+            flex: 0 0 50% !important;
         }
 
         div[data-testid="stHorizontalBlock"] {
-            gap: 2px !important;
+            gap: 0px !important;
         }
 
+        /* Smaller text in portrait */
         h1 { font-size: 16px !important; }
         h2 { font-size: 14px !important; }
-        h3 { font-size: 12px !important; }
+        h3 { font-size: 13px !important; }
+
+        /* Tighter input spacing */
+        .stTextInput, .stNumberInput {
+            margin-bottom: 4px !important;
+        }
+    }
+
+    /* LANDSCAPE MODE: Wider screens (landscape phones, tablets, desktop) */
+    @media (min-width: 601px) {
+        div[data-testid="stHorizontalBlock"] {
+            gap: 4px !important;
+        }
+
+        div[data-testid="column"] {
+            width: calc(50% - 2px) !important;
+            min-width: calc(50% - 2px) !important;
+            max-width: calc(50% - 2px) !important;
+            flex: 0 0 calc(50% - 2px) !important;
+        }
+
+        .stButton > button {
+            padding: 8px 6px !important;
+            min-height: 40px !important;
+        }
     }
     </style>
     """,
