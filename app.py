@@ -10,9 +10,17 @@ from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, 
 from reportlab.lib.units import inch
 from io import BytesIO
 
+hide_st_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            header {visibility: hidden;}
+            footer {visibility: hidden;}
+            </style>
+            """
+st.markdown(hide_st_style, unsafe_allow_html=True)
 # Page configuration
 st.set_page_config(
-    page_title="Construction Site",
+    page_title="Kranthi Industries",
     page_icon="🏗️",
     layout="centered",
     initial_sidebar_state="collapsed",
@@ -322,7 +330,7 @@ st.markdown(
 
 
     /* ============================================
-       MAIN LAYOUT
+       MAIN LAYOUT - Remove all top gaps
        ============================================ */
 
     .stApp {{
@@ -337,9 +345,11 @@ st.markdown(
         background-color: #ffffff;
         border-radius: 0px !important;
         padding: 0 !important;
+        padding-top: 0 !important;
         width: 100% !important;
         max-width: 100vw !important;
         margin: 0 !important;
+        margin-top: 0 !important;
         overflow-x: hidden !important;
     }}
 
@@ -351,10 +361,56 @@ st.markdown(
 
     .main {{
         padding: 0 !important;
+        padding-top: 0 !important;
+        margin-top: 0 !important;
     }}
 
     .main .block-container {{
         padding: 0 !important;
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }}
+
+    /* Remove Streamlit's default top padding */
+    .stApp > header {{
+        display: none !important;
+    }}
+
+    .stApp [data-testid="stAppViewContainer"] {{
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }}
+
+    .stApp [data-testid="stAppViewContainer"] > section {{
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }}
+
+    /* First element should have no top margin */
+    .main .block-container > div:first-child {{
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }}
+
+    /* Remove all vertical blocks top spacing */
+    [data-testid="stVerticalBlock"] {{
+        gap: 0 !important;
+    }}
+
+    [data-testid="stVerticalBlock"] > div:first-child {{
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }}
+
+    /* Ensure app view has no top padding */
+    section[data-testid="stMain"] {{
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }}
+
+    section[data-testid="stMain"] > div {{
+        padding-top: 0 !important;
+        margin-top: 0 !important;
     }}
 
     /* ============================================
@@ -366,12 +422,13 @@ st.markdown(
         padding-left: 2% !important;
         padding-right: 2% !important;
         font-family: {APP_FONT_FAMILY} !important;
+        font-weight: 700 !important;
     }}
 
     h1 {{ font-size: 22px !important; margin: 2% 0 !important; }}
     h2 {{ font-size: 18px !important; margin: 3% 0 2% 0 !important; }}
-    h3 {{ font-size: 16px !important; margin: 1% 0 !important; }}
-    h4 {{ font-size: 14px !important; margin: 1% 0 !important; }}
+    h3 {{ font-size: 16px !important; margin: 4px 0 !important; }}
+    h4 {{ font-size: 14px !important; margin: 0 !important; padding: 0 !important; }}
 
     label, .stMarkdown p {{
         color: rgb(0, 0, 104) !important;
@@ -389,14 +446,15 @@ st.markdown(
         text-overflow: unset !important;
         line-height: 1.3 !important;
         font-size: 12px !important;
-        padding: 3% 2% !important;
-        margin: 1% 0 !important;
+        padding: 10px 8px !important;
+        margin: 2px 0 !important;
         border-radius: 4px !important;
         font-family: {APP_FONT_FAMILY} !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
-        min-height: 44px !important;
+        text-align: center !important;
+        min-height: 40px !important;
     }}
 
     .stButton > button[kind="primary"] {{
@@ -417,23 +475,33 @@ st.markdown(
     }}
 
     /* ============================================
-       FORM INPUTS
+       FORM INPUTS - Labels styled like subheaders (BOLD)
        ============================================ */
 
     .stTextInput label,
     .stNumberInput label {{
         color: rgb(0, 0, 104) !important;
-        font-weight: 600 !important;
-        font-size: 13px !important;
-        margin-bottom: 1% !important;
+        font-weight: 800 !important;
+        font-size: 16px !important;
+        margin-bottom: 4px !important;
         padding-left: 2% !important;
         font-family: {APP_FONT_FAMILY} !important;
+    }}
+
+    /* Ensure label text is bold */
+    .stTextInput label p,
+    .stNumberInput label p,
+    .stTextInput label span,
+    .stNumberInput label span {{
+        font-weight: 800 !important;
+        font-size: 16px !important;
+        color: rgb(0, 0, 104) !important;
     }}
 
     .stTextInput > div > div > input,
     .stNumberInput > div > div > input {{
         font-size: 15px !important;
-        padding: 2.5% !important;
+        padding: 8px !important;
         border: 1px solid #99ccff !important;
         border-radius: 4px !important;
         width: 100% !important;
@@ -446,12 +514,20 @@ st.markdown(
         box-shadow: 0 0 0 1px rgba(0, 0, 104, 0.2) !important;
     }}
 
+    /* Reduced gap between form fields */
     .stTextInput,
     .stNumberInput {{
-        margin-bottom: 2% !important;
+        margin-bottom: 4px !important;
         width: 100% !important;
         padding-left: 2% !important;
         padding-right: 2% !important;
+    }}
+
+    /* Reduce spacing in form field containers */
+    .stTextInput > div,
+    .stNumberInput > div {{
+        margin-bottom: 0 !important;
+        padding-bottom: 0 !important;
     }}
 
     /* ============================================
@@ -473,7 +549,7 @@ st.markdown(
     }}
 
     /* ============================================
-       GRID LAYOUT - 2 Column
+       GRID LAYOUT - 2 Column, Centered
        ============================================ */
 
     div[data-testid="stHorizontalBlock"] {{
@@ -481,10 +557,12 @@ st.markdown(
         grid-template-columns: 1fr 1fr !important;
         width: 100% !important;
         max-width: 100% !important;
-        gap: 2% !important;
+        gap: 8px !important;
         padding: 0 2% !important;
-        margin: 1% 0 !important;
+        margin: 4px 0 !important;
         overflow-x: hidden !important;
+        justify-items: center !important;
+        align-items: center !important;
     }}
 
     div[data-testid="column"] {{
@@ -493,13 +571,31 @@ st.markdown(
         min-width: 0 !important;
         padding: 0 !important;
         margin: 0 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
     }}
 
     [data-testid="column"] .stButton {{
         width: 100% !important;
         max-width: 100% !important;
         min-width: 0 !important;
-        margin: 1% 0 !important;
+        margin: 2px 0 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }}
+
+    /* Center markdown content in columns (for KPI cards) */
+    [data-testid="column"] .stMarkdown {{
+        width: 100% !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }}
+
+    [data-testid="column"] .stMarkdown > div {{
+        width: 100% !important;
     }}
 
     /* ============================================
@@ -665,45 +761,52 @@ st.markdown(
     }}
 
     /* ============================================
-       LOGOUT BUTTON - MUST BE LAST TO OVERRIDE
-       Only targets the specific logout button
+       LOGOUT BUTTON ROW - Title + Logout on same line
        ============================================ */
 
-    /* Logout row - prevent grid layout, use flex instead */
+    /* Title + Logout row - flex layout with space between */
     div[data-testid="stHorizontalBlock"]:has(button[key="logout_btn"]) {{
         display: flex !important;
-        grid-template-columns: none !important;
-        justify-content: flex-end !important;
-        padding: 2% !important;
-        margin-top: 1% !important;
-        background: #f8f9fa !important;
-        border-bottom: 1px solid #e0e0e0 !important;
+        flex-direction: row !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        padding: 4px 2% !important;
+        margin: 0 !important;
+        margin-top: 0 !important;
+        padding-top: 4px !important;
+        gap: 8px !important;
     }}
 
-    /* Make logout column wider */
-    div[data-testid="stHorizontalBlock"]:has(button[key="logout_btn"]) > div[data-testid="column"]:last-child {{
-        min-width: 100px !important;
-        flex: 0 0 auto !important;
-    }}
-
-    /* Hide the empty left column in logout row */
+    /* Title column - left aligned, takes available space */
     div[data-testid="stHorizontalBlock"]:has(button[key="logout_btn"]) > div[data-testid="column"]:first-child {{
-        display: none !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-start !important;
+        flex: 1 !important;
+    }}
+
+    /* Logout column - right aligned, auto width */
+    div[data-testid="stHorizontalBlock"]:has(button[key="logout_btn"]) > div[data-testid="column"]:last-child {{
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        flex: 0 0 auto !important;
+        min-width: 80px !important;
     }}
 
     /* Logout button container */
     .stButton:has(button[key="logout_btn"]) {{
         display: flex !important;
         justify-content: flex-end !important;
-        width: 100% !important;
+        width: auto !important;
+        margin: 0 !important;
     }}
 
     /* Logout button styling - Light Orange */
     .stButton > button[key="logout_btn"] {{
-        padding: 8px 20px !important;
-        font-size: 13px !important;
-        min-height: 36px !important;
-        min-width: 80px !important;
+        padding: 6px 16px !important;
+        font-size: 12px !important;
+        min-height: 32px !important;
         background: #FFD699 !important;
         color: #333 !important;
         border: 1px solid #FFB84D !important;
@@ -711,7 +814,9 @@ st.markdown(
         cursor: pointer !important;
         white-space: nowrap !important;
         font-weight: 600 !important;
-        display: inline-block !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
         visibility: visible !important;
         opacity: 1 !important;
         box-shadow: 0 2px 4px rgba(255, 180, 77, 0.3) !important;
@@ -867,21 +972,6 @@ if not st.session_state.logged_in:
         st.error("Could not connect to Google Sheets")
 
 else:
-    # Add top spacing to avoid Streamlit's hidden header
-    st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
-
-    # Logout button at top right using columns
-    logout_col1, logout_col2 = st.columns([3, 1])
-    with logout_col2:
-        if st.button("Logout", key="logout_btn", type="secondary"):
-            st.session_state.logged_in = False
-            st.session_state.username = ""
-            st.session_state.display_name = ""
-            st.session_state.is_admin = False
-            st.session_state.transaction_type = None
-            st.session_state.payment_mode = None
-            st.rerun()
-
     spreadsheet = get_google_sheet()
     if spreadsheet:
         trans_sheet = get_transactions_sheet(spreadsheet)
@@ -899,8 +989,19 @@ else:
             if not df.empty and not st.session_state.is_admin:
                 user_df = df[df["User"] == st.session_state.username]
 
-            # TODAY'S KPI BOXES - Paid and Received side by side, Balance below
-            st.markdown("#### Today's Summary")
+            # Title row with logout button on right
+            title_col, logout_col = st.columns([3, 1])
+            with title_col:
+                st.markdown("#### Today's Summary")
+            with logout_col:
+                if st.button("Logout", key="logout_btn", type="secondary"):
+                    st.session_state.logged_in = False
+                    st.session_state.username = ""
+                    st.session_state.display_name = ""
+                    st.session_state.is_admin = False
+                    st.session_state.transaction_type = None
+                    st.session_state.payment_mode = None
+                    st.rerun()
             today_paid, today_received, today_balance = get_today_stats(
                 user_df, st.session_state.username, st.session_state.is_admin
             )
@@ -908,23 +1009,23 @@ else:
             col1, col2 = st.columns(2)
             with col1:
                 st.markdown(
-                    f"""<div style="background:#ffe6e6; padding:12px 8px; border-radius:4px; border-left:4px solid #dc3545;
+                    f"""<div style="background:#ffe6e6; padding:8px; border-radius:4px; border-left:4px solid #dc3545;
                     display:flex; flex-direction:column; justify-content:center; align-items:center;
-                    height:70px; box-sizing:border-box; text-align:center;
+                    height:65px; width:100%; box-sizing:border-box; text-align:center;
                     font-family:{APP_FONT_FAMILY};">
-                    <span style="font-size:11px; color:#666; font-family:{APP_FONT_FAMILY}; line-height:1.2; margin-bottom:4px;">PAID</span>
-                    <span style="font-size:18px; font-weight:bold; color:#dc3545; font-family:{APP_FONT_FAMILY}; line-height:1.2;">₹{today_paid:,.0f}</span>
+                    <span style="font-size:10px; color:#666; font-family:{APP_FONT_FAMILY}; line-height:1; margin:0; padding:0;">PAID</span>
+                    <span style="font-size:16px; font-weight:bold; color:#dc3545; font-family:{APP_FONT_FAMILY}; line-height:1; margin-top:4px;">₹{today_paid:,.0f}</span>
                     </div>""",
                     unsafe_allow_html=True,
                 )
             with col2:
                 st.markdown(
-                    f"""<div style="background:#e6ffe6; padding:12px 8px; border-radius:4px; border-left:4px solid #28a745;
+                    f"""<div style="background:#e6ffe6; padding:8px; border-radius:4px; border-left:4px solid #28a745;
                     display:flex; flex-direction:column; justify-content:center; align-items:center;
-                    height:70px; box-sizing:border-box; text-align:center;
+                    height:65px; width:100%; box-sizing:border-box; text-align:center;
                     font-family:{APP_FONT_FAMILY};">
-                    <span style="font-size:11px; color:#666; font-family:{APP_FONT_FAMILY}; line-height:1.2; margin-bottom:4px;">RECEIVED</span>
-                    <span style="font-size:18px; font-weight:bold; color:#28a745; font-family:{APP_FONT_FAMILY}; line-height:1.2;">₹{today_received:,.0f}</span>
+                    <span style="font-size:10px; color:#666; font-family:{APP_FONT_FAMILY}; line-height:1; margin:0; padding:0;">RECEIVED</span>
+                    <span style="font-size:16px; font-weight:bold; color:#28a745; font-family:{APP_FONT_FAMILY}; line-height:1; margin-top:4px;">₹{today_received:,.0f}</span>
                     </div>""",
                     unsafe_allow_html=True,
                 )
@@ -932,12 +1033,12 @@ else:
             balance_color = "#28a745" if today_balance >= 0 else "#dc3545"
             balance_bg = "#e6ffe6" if today_balance >= 0 else "#ffe6e6"
             st.markdown(
-                f"""<div style="background:{balance_bg}; padding:12px 8px; border-radius:4px; border-left:4px solid {balance_color}; margin-top:8px;
+                f"""<div style="background:{balance_bg}; padding:8px; border-radius:4px; border-left:4px solid {balance_color}; margin:8px 2%;
                 display:flex; flex-direction:column; justify-content:center; align-items:center;
-                height:70px; box-sizing:border-box; text-align:center;
+                height:65px; width:96%; box-sizing:border-box; text-align:center;
                 font-family:{APP_FONT_FAMILY};">
-                <span style="font-size:11px; color:#666; font-family:{APP_FONT_FAMILY}; line-height:1.2; margin-bottom:4px;">NET BALANCE</span>
-                <span style="font-size:18px; font-weight:bold; color:{balance_color}; font-family:{APP_FONT_FAMILY}; line-height:1.2;">₹{today_balance:,.0f}</span>
+                <span style="font-size:10px; color:#666; font-family:{APP_FONT_FAMILY}; line-height:1; margin:0; padding:0;">NET BALANCE</span>
+                <span style="font-size:16px; font-weight:bold; color:{balance_color}; font-family:{APP_FONT_FAMILY}; line-height:1; margin-top:4px;">₹{today_balance:,.0f}</span>
                 </div>""",
                 unsafe_allow_html=True,
             )
@@ -945,10 +1046,10 @@ else:
             # TABS
             if st.session_state.is_admin:
                 tab1, tab2, tab3 = st.tabs(
-                    ["New Entry", "Download Statement", "User Summary"]
+                    ["New Entry", "📥 Download Statement", "User Summary"]
                 )
             else:
-                tab1, tab2 = st.tabs(["New Entry", "Download Statement"])
+                tab1, tab2 = st.tabs(["New Entry", "📥 Download Statement"])
 
             with tab1:
                 name = st.text_input(
@@ -1004,38 +1105,38 @@ else:
                 # Payment Mode Buttons - Hardcoded 2x2 layout (2 rows, 2 columns)
                 st.subheader("Payment Mode *")
 
-                # Row 1: Online and GPay
+                # Row 1: Cash and Online
                 col1, col2 = st.columns([1, 1])
                 with col1:
+                    btn_type = (
+                        "primary"
+                        if st.session_state.payment_mode == "Cash"
+                        else "secondary"
+                    )
+                    if st.button(
+                        "💰 Cash",
+                        use_container_width=True,
+                        type=btn_type,
+                        key="btn_cash",
+                    ):
+                        st.session_state.payment_mode = "Cash"
+                        st.rerun()
+                with col2:
                     btn_type = (
                         "primary"
                         if st.session_state.payment_mode == "Online"
                         else "secondary"
                     )
                     if st.button(
-                        "Online",
+                        "💻 Online",
                         use_container_width=True,
                         type=btn_type,
                         key="btn_online",
                     ):
                         st.session_state.payment_mode = "Online"
                         st.rerun()
-                with col2:
-                    btn_type = (
-                        "primary"
-                        if st.session_state.payment_mode == "GPay"
-                        else "secondary"
-                    )
-                    if st.button(
-                        "GPay",
-                        use_container_width=True,
-                        type=btn_type,
-                        key="btn_gpay",
-                    ):
-                        st.session_state.payment_mode = "GPay"
-                        st.rerun()
 
-                # Row 2: PhonePe and Cash
+                # Row 2: PhonePe and GPay
                 col3, col4 = st.columns([1, 1])
                 with col3:
                     btn_type = (
@@ -1044,7 +1145,7 @@ else:
                         else "secondary"
                     )
                     if st.button(
-                        "PhonePe",
+                        "📱 PhonePe",
                         use_container_width=True,
                         type=btn_type,
                         key="btn_phone",
@@ -1054,16 +1155,16 @@ else:
                 with col4:
                     btn_type = (
                         "primary"
-                        if st.session_state.payment_mode == "Cash"
+                        if st.session_state.payment_mode == "GPay"
                         else "secondary"
                     )
                     if st.button(
-                        "Cash",
+                        "💳 GPay",
                         use_container_width=True,
                         type=btn_type,
-                        key="btn_cash",
+                        key="btn_gpay",
                     ):
-                        st.session_state.payment_mode = "Cash"
+                        st.session_state.payment_mode = "GPay"
                         st.rerun()
 
                 st.markdown("")  # spacing
