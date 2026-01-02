@@ -350,20 +350,12 @@ st.markdown(
     /* MOBILE-FIRST: Buttons fit within column exactly */
     .stButton > button {
         width: 100% !important;
-        max-width: 100% !important;
-        height: auto !important;
-        min-height: 28px !important;
-        font-size: clamp(9px, 2vw, 11px) !important;
-        font-weight: bold;
-        margin: 2px 0 !important;
-        padding: 4px 2px !important;
-        border-radius: 4px;
-        border-width: 0.5px !important;
-        transition: none;
-        white-space: nowrap;
-        box-sizing: border-box !important;
-        overflow: hidden !important;
-        text-overflow: ellipsis !important;
+        white-space: normal !important;     /* allow wrap */
+        overflow: visible !important;
+        text-overflow: unset !important;
+        line-height: 1.1 !important;
+        font-size: 9px !important;          /* keep small */
+        padding: 6px 2px !important;
     }
 
     /* Primary buttons - Navy Blue RGB(0,0,104) */
@@ -448,33 +440,26 @@ st.markdown(
         overflow-wrap: break-word !important;
     }
 
-    /* MOBILE-FIRST: Match column container width to submit button width */
+      /* Horizontal container */
     div[data-testid="stHorizontalBlock"] {
         display: flex !important;
         flex-direction: row !important;
-        flex-wrap: nowrap !important;
+        flex-wrap: nowrap !important;   /* keep side-by-side */
         width: 100% !important;
         max-width: 100% !important;
-        overflow: hidden !important;
-        gap: 0px !important;
+        overflow-x: visible !important; /* KEY FIX */
+    }
+    
+    /* Force exact 50/50 columns */
+    div[data-testid="column"] {
+        flex: 0 0 50% !important;
+        width: 50% !important;
+        max-width: 50% !important;
+        min-width: 0 !important;        /* CRITICAL */
         box-sizing: border-box !important;
-        padding: 0 !important;
-        margin: 0 !important;
+        padding: 2px !important;
     }
 
-    /* MOBILE-FIRST: Force columns to be exactly 50% */
-    [data-testid="column"] {
-        width: 50% !important;
-        min-width: 50% !important;
-        max-width: 50% !important;
-        flex: 0 0 50% !important;
-        flex-basis: 50% !important;
-        flex-grow: 0 !important;
-        flex-shrink: 0 !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        box-sizing: border-box !important;
-    }
 
     /* Remove ALL column spacing on mobile */
     div[data-testid="column"]:first-child {
