@@ -855,20 +855,8 @@ div[data-testid="stHorizontalBlock"] {
         min-height: 44px !important;
     }
 
-        /* === KPI ROW (Paid / Received) === */
-    div[data-testid="stHorizontalBlock"]:has([data-testid="stMetric"]) {
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 1px !important;            /* 👈 1px gap to separate cards */
-        width: 100% !important;
-        max-width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
     /* === PAYMENT MODE BUTTON GRID (2x2) === */
     div[data-testid="stHorizontalBlock"]:has(button) {
-        gap: 0px !important;        /* 👈 no gap for full width */
         margin: 0 !important;
         padding: 0 !important;
     }
