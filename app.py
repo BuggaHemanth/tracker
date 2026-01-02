@@ -340,34 +340,36 @@ st.markdown(
         color: rgb(0, 0, 104) !important;
     }
 
-    /* Buttons - Fully responsive */
+    /* Buttons - Fully responsive and fit within column */
     .stButton > button {
         width: 100% !important;
         height: auto !important;
-        min-height: 42px !important;
-        font-size: clamp(11px, 2.5vw, 13px) !important;
+        min-height: 40px !important;
+        font-size: clamp(10px, 2.2vw, 12px) !important;
         font-weight: bold;
         margin: 2px 0 !important;
-        padding: 10px 8px !important;
+        padding: 8px 4px !important;
         border-radius: 6px;
+        border-width: 1px !important;
         transition: all 0.1s ease;
         white-space: nowrap;
         box-sizing: border-box !important;
         overflow: hidden !important;
+        text-overflow: ellipsis !important;
     }
 
     /* Primary buttons - Navy Blue RGB(0,0,104) */
     .stButton > button[kind="primary"] {
         background: rgb(0, 0, 104) !important;
         color: white !important;
-        border: 2px solid rgb(0, 0, 104) !important;
+        border: 1px solid rgb(0, 0, 104) !important;
     }
 
     /* Secondary buttons */
     .stButton > button[kind="secondary"] {
         background: #e6f2ff !important;
         color: rgb(0, 0, 104) !important;
-        border: 2px solid #99ccff !important;
+        border: 1px solid #99ccff !important;
     }
 
     .stButton > button:hover {
@@ -408,52 +410,66 @@ st.markdown(
         box-sizing: border-box !important;
     }
 
-    /* Metric cards - Fully responsive */
+    /* Metric cards - Fully responsive and fit within column */
     [data-testid="stMetric"] {
         background: #e6f2ff;
-        padding: 0.5rem !important;
-        border-radius: 8px;
-        border: 2px solid #99ccff;
+        padding: 6px !important;
+        border-radius: 6px;
+        border: 1px solid #99ccff;
         margin-bottom: 0.5rem !important;
         box-sizing: border-box !important;
         width: 100% !important;
     }
 
     [data-testid="stMetricValue"] {
-        font-size: clamp(16px, 4vw, 18px) !important;
+        font-size: clamp(14px, 3.5vw, 16px) !important;
         font-weight: bold !important;
         color: rgb(0, 0, 104) !important;
+        word-break: break-word !important;
     }
 
     [data-testid="stMetricLabel"] {
-        font-size: clamp(10px, 2.5vw, 11px) !important;
+        font-size: clamp(9px, 2.2vw, 11px) !important;
         color: rgb(0, 0, 104) !important;
         font-weight: 600 !important;
+        word-break: break-word !important;
     }
 
-    /* Force columns to stay side by side - mobile responsive */
+    /* Force columns to occupy exactly 50% each */
     [data-testid="column"] {
-        min-width: 0 !important;
-        flex: 1 1 0 !important;
+        width: 50% !important;
+        min-width: 50% !important;
         max-width: 50% !important;
+        flex: 0 0 50% !important;
+        flex-basis: 50% !important;
+        flex-grow: 0 !important;
+        flex-shrink: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
 
-    /* Prevent columns from stacking on mobile */
+    /* First column - small right padding */
     div[data-testid="column"]:first-child {
         padding-right: 2px !important;
         padding-left: 0 !important;
     }
 
+    /* Last column - small left padding */
     div[data-testid="column"]:last-child {
         padding-left: 2px !important;
         padding-right: 0 !important;
     }
 
-    /* Force horizontal layout for columns */
+    /* Middle columns if any */
+    div[data-testid="column"]:not(:first-child):not(:last-child) {
+        padding: 0 1px !important;
+    }
+
+    /* Force horizontal layout - no gap */
     .row-widget.stHorizontal {
         display: flex !important;
         flex-direction: row !important;
-        gap: 4px !important;
+        gap: 0 !important;
         width: 100% !important;
     }
 
@@ -464,6 +480,7 @@ st.markdown(
         flex-wrap: nowrap !important;
         width: 100% !important;
         overflow: visible !important;
+        gap: 0 !important;
     }
 
     /* Tabs - Reduced spacing */
@@ -502,13 +519,6 @@ st.markdown(
         font-size: 14px !important;
         border: 2px solid #99ccff !important;
         border-radius: 6px !important;
-    }
-
-    /* Column spacing - Responsive */
-    div[data-testid="column"] {
-        padding: 0 2px !important;
-        box-sizing: border-box !important;
-        min-width: 0 !important;
     }
 
     /* Ensure subheaders are visible */
@@ -558,27 +568,43 @@ st.markdown(
     /* Mobile-specific overrides for small screens */
     @media (max-width: 480px) {
         .block-container {
-            padding: 0.75rem !important;
+            padding: 0.7rem !important;
             max-width: 100vw !important;
             width: 100% !important;
         }
 
         .stButton > button {
-            font-size: 11px !important;
-            padding: 8px 4px !important;
-            min-height: 38px !important;
+            font-size: 10px !important;
+            padding: 7px 2px !important;
+            min-height: 36px !important;
         }
 
         [data-testid="stMetricValue"] {
-            font-size: 14px !important;
+            font-size: 13px !important;
         }
 
         [data-testid="stMetricLabel"] {
-            font-size: 9px !important;
+            font-size: 8px !important;
+        }
+
+        [data-testid="stMetric"] {
+            padding: 4px !important;
         }
 
         div[data-testid="column"] {
-            padding: 0 1px !important;
+            width: 50% !important;
+            min-width: 50% !important;
+            max-width: 50% !important;
+        }
+
+        div[data-testid="column"]:first-child {
+            padding-right: 1px !important;
+            padding-left: 0 !important;
+        }
+
+        div[data-testid="column"]:last-child {
+            padding-left: 1px !important;
+            padding-right: 0 !important;
         }
 
         h1 { font-size: 18px !important; }
