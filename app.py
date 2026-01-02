@@ -724,6 +724,64 @@ st.markdown(
         white-space: nowrap !important;
     }
 
+
+    /* Remove Streamlit column gap completely */
+    div[data-testid="stHorizontalBlock"] {
+        gap: 0 !important;
+        column-gap: 0 !important;
+    }
+
+    /* FORCE EXACT 2-COLUMN GRID – NO OVERFLOW */
+    div[data-testid="stHorizontalBlock"] {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    }
+
+    /* =========================================================
+   FINAL OVERRIDES — MUST BE AT THE VERY END
+   This fixes horizontal scrolling permanently
+   ========================================================= */
+
+/* Force Streamlit rows to be EXACTLY 2 columns */
+div[data-testid="stHorizontalBlock"] {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    gap: 0 !important;
+    overflow-x: hidden !important;
+}
+    
+    /* Columns must fully fit grid cell */
+    div[data-testid="column"] {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Button containers */
+    [data-testid="column"] .stButton {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+    
+    /* Actual buttons */
+    .stButton > button {
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 4px 2px !important;
+        font-size: 9px !important;
+        white-space: nowrap !important;
+    }
+
     
     </style>
     """,
