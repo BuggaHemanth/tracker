@@ -319,9 +319,9 @@ st.markdown(
     .block-container {
         background-color: #ffffff;
         border-radius: 10px;
-        padding: 1rem !important;
+        padding: 0.5rem !important;
         width: 100% !important;
-        max-width: min(95vw, 500px) !important;
+        max-width: min(98vw, 500px) !important;
         margin: 0 auto !important;
         overflow-x: hidden !important;
         box-sizing: border-box !important;
@@ -343,15 +343,16 @@ st.markdown(
     /* Buttons - Fully responsive and fit within column */
     .stButton > button {
         width: 100% !important;
+        max-width: 100% !important;
         height: auto !important;
-        min-height: 40px !important;
-        font-size: clamp(10px, 2.2vw, 12px) !important;
+        min-height: 38px !important;
+        font-size: clamp(9px, 2vw, 11px) !important;
         font-weight: bold;
         margin: 2px 0 !important;
-        padding: 8px 4px !important;
-        border-radius: 6px;
+        padding: 6px 2px !important;
+        border-radius: 4px;
         border-width: 1px !important;
-        transition: all 0.1s ease;
+        transition: none;
         white-space: nowrap;
         box-sizing: border-box !important;
         overflow: hidden !important;
@@ -382,87 +383,92 @@ st.markdown(
     .stNumberInput label {
         color: rgb(0, 0, 104) !important;
         font-weight: 600 !important;
-        font-size: 14px !important;
-        margin-bottom: 4px !important;
+        font-size: 13px !important;
+        margin-bottom: 3px !important;
     }
 
     .stTextInput > div > div > input,
     .stNumberInput > div > div > input {
-        font-size: 16px !important;
-        padding: 8px !important;
-        border: 2px solid #99ccff !important;
-        border-radius: 6px !important;
+        font-size: 15px !important;
+        padding: 6px !important;
+        border: 1px solid #99ccff !important;
+        border-radius: 4px !important;
         width: 100% !important;
+        max-width: 100% !important;
         box-sizing: border-box !important;
     }
 
     .stTextInput > div > div > input:focus,
     .stNumberInput > div > div > input:focus {
         border-color: rgb(0, 0, 104) !important;
-        box-shadow: 0 0 0 2px rgba(0, 0, 104, 0.2) !important;
+        box-shadow: 0 0 0 1px rgba(0, 0, 104, 0.2) !important;
     }
 
     /* Reduce spacing between input fields */
     .stTextInput,
     .stNumberInput {
-        margin-bottom: 8px !important;
+        margin-bottom: 6px !important;
         width: 100% !important;
+        max-width: 100% !important;
         box-sizing: border-box !important;
     }
 
     /* Metric cards - Fully responsive and fit within column */
     [data-testid="stMetric"] {
         background: #e6f2ff;
-        padding: 6px !important;
-        border-radius: 6px;
+        padding: 4px !important;
+        border-radius: 4px;
         border: 1px solid #99ccff;
         margin-bottom: 0.5rem !important;
         box-sizing: border-box !important;
         width: 100% !important;
+        max-width: 100% !important;
     }
 
     [data-testid="stMetricValue"] {
-        font-size: clamp(14px, 3.5vw, 16px) !important;
+        font-size: clamp(12px, 3vw, 14px) !important;
         font-weight: bold !important;
         color: rgb(0, 0, 104) !important;
         word-break: break-word !important;
+        overflow-wrap: break-word !important;
     }
 
     [data-testid="stMetricLabel"] {
-        font-size: clamp(9px, 2.2vw, 11px) !important;
+        font-size: clamp(8px, 2vw, 10px) !important;
         color: rgb(0, 0, 104) !important;
         font-weight: 600 !important;
         word-break: break-word !important;
+        overflow-wrap: break-word !important;
     }
 
-    /* Force columns to occupy exactly 50% each */
+    /* Force columns to occupy exactly 50% each with minimal spacing */
     [data-testid="column"] {
-        width: 50% !important;
-        min-width: 50% !important;
-        max-width: 50% !important;
-        flex: 0 0 50% !important;
-        flex-basis: 50% !important;
+        width: 49.5% !important;
+        min-width: 49.5% !important;
+        max-width: 49.5% !important;
+        flex: 0 0 49.5% !important;
+        flex-basis: 49.5% !important;
         flex-grow: 0 !important;
         flex-shrink: 0 !important;
         padding: 0 !important;
         margin: 0 !important;
     }
 
-    /* First column - small right padding */
+    /* First column - tiny right padding */
     div[data-testid="column"]:first-child {
-        padding-right: 2px !important;
+        padding-right: 1px !important;
         padding-left: 0 !important;
     }
 
-    /* Last column - small left padding */
+    /* Last column - tiny left padding */
     div[data-testid="column"]:last-child {
-        padding-left: 2px !important;
+        padding-left: 1px !important;
         padding-right: 0 !important;
     }
 
     /* Middle columns if any */
     div[data-testid="column"]:not(:first-child):not(:last-child) {
-        padding: 0 1px !important;
+        padding: 0 0.5px !important;
     }
 
     /* Force horizontal layout - no gap */
@@ -530,12 +536,32 @@ st.markdown(
     /* Force button columns to be equal width and fit */
     [data-testid="column"] > div {
         width: 100% !important;
+        max-width: 100% !important;
         box-sizing: border-box !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
 
     /* Prevent column overflow */
     div[data-testid="stHorizontalBlock"] {
         width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* Ensure button containers don't add extra width */
+    .stButton {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    /* Ensure all child divs respect parent width */
+    [data-testid="column"] * {
+        max-width: 100% !important;
         box-sizing: border-box !important;
     }
 
@@ -568,48 +594,48 @@ st.markdown(
     /* Mobile-specific overrides for small screens */
     @media (max-width: 480px) {
         .block-container {
-            padding: 0.7rem !important;
+            padding: 0.4rem !important;
             max-width: 100vw !important;
             width: 100% !important;
         }
 
         .stButton > button {
-            font-size: 10px !important;
-            padding: 7px 2px !important;
-            min-height: 36px !important;
+            font-size: 9px !important;
+            padding: 6px 1px !important;
+            min-height: 34px !important;
         }
 
         [data-testid="stMetricValue"] {
-            font-size: 13px !important;
+            font-size: 11px !important;
         }
 
         [data-testid="stMetricLabel"] {
-            font-size: 8px !important;
+            font-size: 7px !important;
         }
 
         [data-testid="stMetric"] {
-            padding: 4px !important;
+            padding: 3px !important;
         }
 
         div[data-testid="column"] {
-            width: 50% !important;
-            min-width: 50% !important;
-            max-width: 50% !important;
+            width: 49.5% !important;
+            min-width: 49.5% !important;
+            max-width: 49.5% !important;
         }
 
         div[data-testid="column"]:first-child {
-            padding-right: 1px !important;
+            padding-right: 0.5px !important;
             padding-left: 0 !important;
         }
 
         div[data-testid="column"]:last-child {
-            padding-left: 1px !important;
+            padding-left: 0.5px !important;
             padding-right: 0 !important;
         }
 
-        h1 { font-size: 18px !important; }
-        h2 { font-size: 16px !important; }
-        h3 { font-size: 14px !important; }
+        h1 { font-size: 16px !important; }
+        h2 { font-size: 14px !important; }
+        h3 { font-size: 12px !important; }
     }
     </style>
     """,
