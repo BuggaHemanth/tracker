@@ -45,12 +45,9 @@ def get_google_sheet():
 def get_transactions_sheet(spreadsheet):
     """Get transactions sheet"""
     try:
-        sheet = spreadsheet.sheet1
-        # Test if sheet is accessible by getting row count
-        _ = sheet.row_count
-        return sheet
+        return spreadsheet.sheet1
     except Exception as e:
-        st.error(f"Could not access transactions sheet: {e}")
+        # Don't display error here - let the calling code handle it
         return None
 
 
@@ -297,669 +294,414 @@ def create_pdf_statement(df, start_date, end_date, username, is_admin):
     return buffer
 
 
+# ============================================
+# FONT CONFIGURATION - Change this to update app font
+# ============================================
+APP_FONT_FAMILY = (
+    "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif"
+)
+
 # Navy Blue Theme CSS - RGB(0,0,104) - Mobile Optimized
 st.markdown(
-    """
+    f"""
     <style>
-    /* Universal box-sizing and overflow prevention */
-    * {
+    /* ============================================
+       GLOBAL FONT SETTING
+       Change APP_FONT_FAMILY variable above to update
+       ============================================ */
+    * {{
+        font-family: {APP_FONT_FAMILY} !important;
         box-sizing: border-box !important;
-    }
+    }}
 
-    /* Main background - Navy Blue RGB(0,0,104) */
-    .stApp {
+    html, body, .stApp, .main, .block-container,
+    h1, h2, h3, h4, h5, h6, p, span, div, label,
+    input, button, textarea, select {{
+        font-family: {APP_FONT_FAMILY} !important;
+    }}
+
+
+    /* ============================================
+       MAIN LAYOUT
+       ============================================ */
+
+    .stApp {{
         background: rgb(0, 0, 104);
-        overflow-x: visible !important;
+        overflow-x: hidden !important;
         width: 100% !important;
         padding: 0 !important;
         margin: 0 !important;
-    }
+    }}
 
-    /* Content area - MOBILE-FIRST responsive layout */
-    .block-container {
+    .block-container {{
         background-color: #ffffff;
         border-radius: 0px !important;
-        padding: 0rem !important;
+        padding: 0 !important;
         width: 100% !important;
         max-width: 100vw !important;
         margin: 0 !important;
-        overflow-x: visible !important;
-        box-sizing: border-box !important;
-    }
+        overflow-x: hidden !important;
+    }}
 
-    /* Wider screens get constrained width */
-    @media (min-width: 500px) {
-        .block-container {
+    @media (min-width: 500px) {{
+        .block-container {{
             max-width: 500px !important;
-            padding: 0rem !important;
-        }
-    }
+        }}
+    }}
 
-    /* Headers */
-    h1, h2, h3 {
+    .main {{
+        padding: 0 !important;
+    }}
+
+    .main .block-container {{
+        padding: 0 !important;
+    }}
+
+    /* ============================================
+       TYPOGRAPHY
+       ============================================ */
+
+    h1, h2, h3, h4 {{
         color: rgb(0, 0, 104) !important;
-        padding-left: 4px !important;
-        padding-right: 4px !important;
-    }
-    h1 { font-size: 22px !important; margin: 5px 0 !important; }
-    h2 { font-size: 18px !important; margin: 10px 0 5px 0 !important; }
-    h3 { font-size: 16px !important; margin: 5px 0 8px 0 !important; }
+        padding-left: 2% !important;
+        padding-right: 2% !important;
+        font-family: {APP_FONT_FAMILY} !important;
+    }}
 
-    /* Ensure all labels are visible */
-    label, .stMarkdown p {
+    h1 {{ font-size: 22px !important; margin: 2% 0 !important; }}
+    h2 {{ font-size: 18px !important; margin: 3% 0 2% 0 !important; }}
+    h3 {{ font-size: 16px !important; margin: 1% 0 !important; }}
+    h4 {{ font-size: 14px !important; margin: 1% 0 !important; }}
+
+    label, .stMarkdown p {{
         color: rgb(0, 0, 104) !important;
-    }
+        font-family: {APP_FONT_FAMILY} !important;
+    }}
 
-    /* MOBILE-FIRST: Buttons fit within column exactly */
-    .stButton > button {
+    /* ============================================
+       BUTTONS - Mobile-first with percentage spacing
+       ============================================ */
+
+    .stButton > button {{
         width: 100% !important;
-        white-space: normal !important;     /* allow wrap */
+        white-space: normal !important;
         overflow: visible !important;
         text-overflow: unset !important;
-        line-height: 1.2 !important;
-        font-size: 10px !important;          /* slightly larger for readability */
-        padding: 8px 2px !important;
-        box-sizing: border-box !important;
-        margin: 0 !important;
-        border-radius: 0px !important;
-    }
+        line-height: 1.3 !important;
+        font-size: 12px !important;
+        padding: 3% 2% !important;
+        margin: 1% 0 !important;
+        border-radius: 4px !important;
+        font-family: {APP_FONT_FAMILY} !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-height: 44px !important;
+    }}
 
-    /* Primary buttons - Navy Blue RGB(0,0,104) */
-    .stButton > button[kind="primary"] {
+    .stButton > button[kind="primary"] {{
         background: rgb(0, 0, 104) !important;
         color: white !important;
         border: 1px solid rgb(0, 0, 104) !important;
-    }
+    }}
 
-    /* Secondary buttons */
-    .stButton > button[kind="secondary"] {
+    .stButton > button[kind="secondary"] {{
         background: #e6f2ff !important;
         color: rgb(0, 0, 104) !important;
         border: 1px solid #99ccff !important;
-    }
+    }}
 
-    .stButton > button:hover {
+    .stButton > button:hover {{
         transform: scale(1.02);
         box-shadow: 0 2px 8px rgba(0, 0, 104, 0.3) !important;
-    }
+    }}
 
-    /* Text inputs - Compact with visible labels */
+    /* ============================================
+       FORM INPUTS
+       ============================================ */
+
     .stTextInput label,
-    .stNumberInput label {
+    .stNumberInput label {{
         color: rgb(0, 0, 104) !important;
         font-weight: 600 !important;
         font-size: 13px !important;
-        margin-bottom: 3px !important;
-        padding-left: 4px !important;
-    }
+        margin-bottom: 1% !important;
+        padding-left: 2% !important;
+        font-family: {APP_FONT_FAMILY} !important;
+    }}
 
     .stTextInput > div > div > input,
-    .stNumberInput > div > div > input {
+    .stNumberInput > div > div > input {{
         font-size: 15px !important;
-        padding: 6px !important;
+        padding: 2.5% !important;
         border: 1px solid #99ccff !important;
         border-radius: 4px !important;
         width: 100% !important;
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-    }
+        font-family: {APP_FONT_FAMILY} !important;
+    }}
 
     .stTextInput > div > div > input:focus,
-    .stNumberInput > div > div > input:focus {
+    .stNumberInput > div > div > input:focus {{
         border-color: rgb(0, 0, 104) !important;
         box-shadow: 0 0 0 1px rgba(0, 0, 104, 0.2) !important;
-    }
+    }}
 
-    /* Reduce spacing between input fields */
     .stTextInput,
-    .stNumberInput {
-        margin-bottom: 6px !important;
+    .stNumberInput {{
+        margin-bottom: 2% !important;
         width: 100% !important;
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-        padding-left: 4px !important;
-        padding-right: 4px !important;
-    }
+        padding-left: 2% !important;
+        padding-right: 2% !important;
+    }}
 
-    /* Metric cards - Fully responsive and fit within column */
-    [data-testid="stMetric"] {
-        background: #e6f2ff;
-        padding: 8px !important;
-        border-radius: 0px;
-        border: 0.5px solid #99ccff;
-        margin-bottom: 0.5rem !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-        box-sizing: border-box !important;
-        width: 100% !important;
-        max-width: 100% !important;
-    }
+    /* ============================================
+       DATE INPUTS
+       ============================================ */
 
-    [data-testid="stMetricValue"] {
-        font-size: clamp(12px, 3vw, 14px) !important;
-        font-weight: bold !important;
-        color: rgb(0, 0, 104) !important;
-        word-break: break-word !important;
-        overflow-wrap: break-word !important;
-    }
-
-    [data-testid="stMetricLabel"] {
-        font-size: clamp(8px, 2vw, 10px) !important;
-        color: rgb(0, 0, 104) !important;
-        font-weight: 600 !important;
-        word-break: break-word !important;
-        overflow-wrap: break-word !important;
-    }
-
-      /* Horizontal container */
-    div[data-testid="stHorizontalBlock"] {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;   /* keep side-by-side */
-        width: 100% !important;
-        max-width: 100% !important;
-        overflow-x: visible !important; /* KEY FIX */
-        gap: 0px !important;
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    /* Force exact 50/50 columns */
-    div[data-testid="column"] {
-        flex: 0 0 50% !important;
-        width: 50% !important;
-        max-width: 50% !important;
-        min-width: 0 !important;        /* CRITICAL */
-        box-sizing: border-box !important;
-        padding: 0px !important;
-    }
-
-
-    /* Remove ALL column spacing on mobile */
-    div[data-testid="column"]:first-child {
-        padding: 0 !important;
-        margin: 0 !important;
-        border-right: 0.5px solid transparent !important;
-    }
-
-    div[data-testid="column"]:last-child {
-        padding: 0 !important;
-        margin: 0 !important;
-        border-left: 0.5px solid transparent !important;
-    }
-
-    div[data-testid="column"]:not(:first-child):not(:last-child) {
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-
-    /* Remove any layout gaps on mobile */
-    .row-widget.stHorizontal {
-        display: flex !important;
-        flex-direction: row !important;
-        gap: 0px !important;
-        width: 100% !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-
-    /* Tabs - Reduced spacing */
-    .stTabs {
-        margin-top: -10px !important;
-    }
-
-    .stTabs [data-baseweb="tab-list"] {
-        gap: 4px;
-        background-color: #e6f2ff;
-        border-radius: 8px;
-        padding: 4px;
-        margin-bottom: 10px !important;
-    }
-
-    .stTabs [data-baseweb="tab"] {
-        color: rgb(0, 0, 104) !important;
-        font-weight: 600;
-        font-size: 14px !important;
-        padding: 8px 12px !important;
-    }
-
-    .stTabs [aria-selected="true"] {
-        background: rgb(0, 0, 104) !important;
-        color: white !important;
-    }
-
-    /* Date inputs with visible labels */
-    .stDateInput label {
+    .stDateInput label {{
         color: rgb(0, 0, 104) !important;
         font-weight: 600 !important;
         font-size: 14px !important;
-    }
+        font-family: {APP_FONT_FAMILY} !important;
+    }}
 
-    .stDateInput > div > div > input {
+    .stDateInput > div > div > input {{
         font-size: 14px !important;
         border: 2px solid #99ccff !important;
         border-radius: 6px !important;
-    }
+        font-family: {APP_FONT_FAMILY} !important;
+    }}
 
-    /* Ensure subheaders are visible */
-    .stMarkdown h2 {
-        margin-top: 8px !important;
-        margin-bottom: 6px !important;
-    }
+    /* ============================================
+       GRID LAYOUT - 2 Column
+       ============================================ */
 
-    /* Force all elements inside columns to fit */
-    [data-testid="column"] > div {
+    div[data-testid="stHorizontalBlock"] {{
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
         width: 100% !important;
         max-width: 100% !important;
-        box-sizing: border-box !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
+        gap: 2% !important;
+        padding: 0 2% !important;
+        margin: 1% 0 !important;
+        overflow-x: hidden !important;
+    }}
 
-    /* Ensure button containers match column width exactly */
-    .stButton {
+    div[data-testid="column"] {{
         width: 100% !important;
         max-width: 100% !important;
-        margin: 0 !important;
+        min-width: 0 !important;
         padding: 0 !important;
-        box-sizing: border-box !important;
-    }
+        margin: 0 !important;
+    }}
 
-    /* Ensure all child divs respect parent width */
-    [data-testid="column"] * {
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-    }
-
-    /* Remove ALL default streamlit element spacing */
-    [data-testid="column"] .element-container {
+    [data-testid="column"] .stButton {{
         width: 100% !important;
         max-width: 100% !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
+        min-width: 0 !important;
+        margin: 1% 0 !important;
+    }}
 
-    /* Remove Streamlit's default vertical rhythm */
-    [data-testid="column"] > div > div {
-        padding: 0 !important;
-        margin: 0 !important;
-    }
+    /* ============================================
+       TABS
+       ============================================ */
 
-    /* Remove all padding from element containers */
-    .element-container {
-        padding: 0 !important;
-        margin: 0 !important;
-    }
+    .stTabs {{
+        margin-top: 2% !important;
+        margin-bottom: 0 !important;
+    }}
 
-    /* Ensure main container has no extra padding */
-    .main .block-container {
-        padding-left: 0rem !important;
-        padding-right: 0rem !important;
-        padding-top: 0rem !important;
-        padding-bottom: 0rem !important;
-    }
+    .stTabs [data-baseweb="tab-list"] {{
+        gap: 1%;
+        background-color: #e6f2ff;
+        border-radius: 8px;
+        padding: 1%;
+        margin-bottom: 0 !important;
+    }}
 
-    /* Remove default Streamlit padding */
-    .main {
-        padding: 0 !important;
-    }
+    .stTabs [data-baseweb="tab"] {{
+        color: rgb(0, 0, 104) !important;
+        font-weight: 600;
+        font-size: 14px !important;
+        padding: 2% 3% !important;
+        font-family: {APP_FONT_FAMILY} !important;
+    }}
 
-    /* Success/Error messages */
-    .stSuccess {
+    .stTabs [aria-selected="true"] {{
+        background: rgb(0, 0, 104) !important;
+        color: white !important;
+    }}
+
+    .stTabs [data-baseweb="tab-panel"] {{
+        padding-top: 2% !important;
+        margin-top: 0 !important;
+    }}
+
+    /* ============================================
+       ALERTS / MESSAGES
+       ============================================ */
+
+    .stSuccess {{
         background-color: #d4edda !important;
         color: #155724 !important;
-        padding: 12px !important;
+        padding: 3% !important;
         border-radius: 8px !important;
         border-left: 4px solid #28a745 !important;
         font-weight: bold !important;
-    }
+        font-family: {APP_FONT_FAMILY} !important;
+    }}
 
-    .stError {
+    .stError {{
         background-color: #f8d7da !important;
         color: #721c24 !important;
         border-left: 4px solid #dc3545 !important;
-    }
+        font-family: {APP_FONT_FAMILY} !important;
+    }}
 
-    /* Info messages */
-    .stInfo {
+    .stInfo {{
         background-color: #d1ecf1 !important;
         color: #0c5460 !important;
         font-size: 14px !important;
-    }
+        font-family: {APP_FONT_FAMILY} !important;
+    }}
+
+    .stWarning {{
+        font-family: {APP_FONT_FAMILY} !important;
+    }}
 
     /* Hide sidebar */
-    section[data-testid="stSidebar"] { display: none; }
-
-    /* PORTRAIT MODE: Very narrow screens (phones in portrait) */
-    @media (max-width: 600px) {
-        .block-container {
-            padding: 0rem !important;
-            max-width: 100vw !important;
-            width: 100% !important;
-        }
-
-        /* Ultra-compact buttons for portrait - EXCEPT login buttons */
-        .stButton > button {
-            font-size: 10px !important;
-            padding: 8px 2px !important;
-            min-height: 32px !important;
-            margin: 0 !important;
-            border-radius: 0px !important;
-        }
-
-        /* EXCEPTION: Keep login buttons normal size even in portrait */
-        button[data-testid*="baseButton"][kind="primary"],
-        [data-testid="column"]:has(button[key*="login"]) .stButton > button,
-        [data-testid="column"]:has(button[key*="register"]) .stButton > button,
-        [data-testid="column"]:has(button[key*="account"]) .stButton > button {
-            padding: 12px 16px !important;
-            font-size: 14px !important;
-            min-height: 42px !important;
-            margin: 4px 0 !important;
-        }
-
-        /* Smaller metrics for portrait */
-        [data-testid="stMetricValue"] {
-            font-size: 12px !important;
-        }
-
-        [data-testid="stMetricLabel"] {
-            font-size: 9px !important;
-        }
-
-        [data-testid="stMetric"] {
-            padding: 4px !important;
-            margin-left: 0 !important;
-            margin-right: 0 !important;
-        }
-
-    /* Force true 50% columns */
-    div[data-testid="column"] {
-        flex: 0 0 50% !important;
-        width: 50% !important;
-        max-width: 50% !important;
-        min-width: 0 !important;          /* 🔑 allows shrinking */
-        box-sizing: border-box !important;
-        padding: 0px !important;
-    }
-
-
-        div[data-testid="stHorizontalBlock"] {
-            gap: 0px !important;
-        }
-
-        /* Smaller text in portrait */
-        h1 { font-size: 16px !important; }
-        h2 { font-size: 14px !important; }
-        h3 { font-size: 13px !important; }
-
-        /* Tighter input spacing */
-        .stTextInput, .stNumberInput {
-            margin-bottom: 4px !important;
-        }
-
-        /* EXCEPTION: Login page inputs need normal size */
-        .stTextInput:has(input[key*="login"]) input,
-        .stTextInput:has(input[key*="register"]) input {
-            font-size: 16px !important;
-            padding: 10px !important;
-            min-height: 40px !important;
-        }
-    }
-
-    /* LANDSCAPE MODE: Wider screens (landscape phones, tablets, desktop) */
-    @media (min-width: 601px) {
-        div[data-testid="stHorizontalBlock"] {
-            gap: 0px !important;
-        }
-
-    /* Force true 50% columns */
-    div[data-testid="column"] {
-        flex: 0 0 50% !important;
-        width: 50% !important;
-        max-width: 50% !important;
-        min-width: 0 !important;          /* 🔑 allows shrinking */
-        box-sizing: border-box !important;
-        padding: 0px !important;
-    }
-
-
-        .stButton > button {
-            padding: 8px 6px !important;
-            min-height: 40px !important;
-        }
-    }
-    /* STEP 2: Force button container to respect column width */
-    [data-testid="column"] .stButton {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-    box-sizing: border-box !important;
-    }
-
-    /* STEP 3: Force the button itself to not exceed 50% column */
-    .stButton > button {
-    width: 100% !important;
-    max-width: 100% !important;
-    min-width: 0 !important;
-
-    padding: 8px 2px !important;
-    font-size: 10px !important;
-
-    white-space: normal !important;
-    overflow: visible !important;
-    text-overflow: unset !important;
-    border-radius: 0px !important;
-    }
-
-        /* FINAL OVERRIDE – MUST BE LAST */
-    div[data-testid="stHorizontalBlock"] {
-        overflow-x: visible !important;
-    }
-
-    div[data-testid="column"] {
-        flex: 0 0 50% !important;
-        width: 50% !important;
-        max-width: 50% !important;
-        min-width: 0 !important;
-    }
-
-    [data-testid="column"] .stButton {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-    }
-
-    .stButton > button {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-        font-size: 9px !important;
-        padding: 4px 2px !important;
-        white-space: nowrap !important;
-    }
-
-
-    /* Remove Streamlit column gap completely */
-    div[data-testid="stHorizontalBlock"] {
-        gap: 0 !important;
-        column-gap: 0 !important;
-    }
-
-    /* FORCE EXACT 2-COLUMN GRID – NO OVERFLOW */
-    div[data-testid="stHorizontalBlock"] {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    overflow-x: visible !important;
-    }
-
-    /* =========================================================
-   FINAL OVERRIDES — MUST BE AT THE VERY END
-   This fixes horizontal scrolling permanently
-   ========================================================= */
-
-/* Force Streamlit rows to be EXACTLY 2 columns */
-div[data-testid="stHorizontalBlock"] {
-    display: grid !important;
-    grid-template-columns: 1fr 1fr !important;
-    width: 100% !important;
-    max-width: 100% !important;
-    gap: 0 !important;
-    overflow-x: hidden !important;
-}
-
-    /* Columns must fully fit grid cell */
-    div[data-testid="column"] {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        box-sizing: border-box !important;
-    }
-
-    /* Button containers */
-    [data-testid="column"] .stButton {
-        width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-    }
-
-    /* Actual buttons */
-    .stButton > button {
-        width: 100% !important;
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-        padding: 8px 2px !important;
-        font-size: 10px !important;
-        white-space: normal !important;
-        border-radius: 0px !important;
-    }
-
-    /* FIX: Login/Register buttons need normal sizing for clickability */
-    button[data-testid*="baseButton"][kind="primary"],
-    .stButton > button:first-child {
-        padding: 12px 20px !important;
-        font-size: 15px !important;
-        min-height: 44px !important;
-    }
-
-    /* Specifically target login page buttons */
-    [data-testid="column"]:has(button[key*="login"]) .stButton > button,
-    [data-testid="column"]:has(button[key*="register"]) .stButton > button,
-    [data-testid="column"]:has(button[key*="account"]) .stButton > button {
-        padding: 12px 20px !important;
-        font-size: 15px !important;
-        min-height: 44px !important;
-    }
-
-    /* === PAYMENT MODE BUTTON GRID (2x2) === */
-    div[data-testid="stHorizontalBlock"]:has(button) {
-        margin: 0 !important;
-        padding: 0 !important;
-    }
-
-    [data-testid="column"] {
-        padding: 0 !important;      /* remove extra space */
-        margin: 0 !important;
-    }
-
-    .stButton {
-        margin-bottom: 2px !important;
-        margin-left: 0 !important;
-        margin-right: 0 !important;
-    }
-
-    /* === STICKY LOGOUT BUTTON === */
-    .logout-bar {
-        position: sticky;
-        top: 0;
-        z-index: 1000;
-        background: white;
-        padding: 6px 8px;
-        display: flex;
-        justify-content: flex-end;
-    }
+    section[data-testid="stSidebar"] {{ display: none; }}
 
     /* ============================================
-       FINAL OVERRIDE: LOGIN BUTTONS MUST BE CLICKABLE
-       This rule must be LAST to override all others
+       LOGIN/REGISTER BUTTONS - Special styling
        ============================================ */
+
     button[key="login_btn"],
     button[key="register_btn"],
     button[key="create_account_btn"],
-    button[key="back_login_btn"],
-    [data-testid="column"]:nth-child(1) > div > div > div > button[kind="primary"]:first-of-type,
-    [data-testid="column"]:nth-child(2) > div > div > div > button {
-        padding: 12px 20px !important;
+    button[key="back_login_btn"] {{
+        padding: 3% 5% !important;
         font-size: 15px !important;
         min-height: 44px !important;
-        margin: 4px 0 !important;
-        white-space: normal !important;
-    }
+        margin: 2% 0 !important;
+        font-family: {APP_FONT_FAMILY} !important;
+    }}
 
-    /* Login page text inputs must be readable */
+    /* Login page text inputs */
     input[key="login_username"],
     input[key="login_password"],
     input[key="reg_name"],
     input[key="reg_phone"],
     input[key="reg_username"],
     input[key="reg_password"],
-    input[key="reg_confirm_password"] {
+    input[key="reg_confirm_password"] {{
         font-size: 16px !important;
-        padding: 10px !important;
+        padding: 3% !important;
         min-height: 42px !important;
-    }
+        font-family: {APP_FONT_FAMILY} !important;
+    }}
 
-    /* ============================================
-       ABSOLUTE FINAL FIX: Ensure login buttons work
-       ============================================ */
-    /* Login button containers must be visible and clickable */
-    [data-testid="column"]:has(button[kind="primary"]) {
-        position: relative !important;
-        z-index: 100 !important;
-        overflow: visible !important;
-    }
-
-    /* Login buttons must be fully visible and clickable */
+    /* Ensure buttons are clickable */
     button[kind="primary"],
-    button[data-baseweb="button"] {
+    button[data-baseweb="button"] {{
         pointer-events: auto !important;
         position: relative !important;
         z-index: 101 !important;
         cursor: pointer !important;
-    }
+    }}
 
+    /* ============================================
+       MOBILE PORTRAIT MODE (< 600px)
+       ============================================ */
 
-    /* ================================
-    FIX HUGE GAP INSIDE WHITE CARD
-    ================================ */
+    @media (max-width: 600px) {{
+        .block-container {{
+            padding: 0 !important;
+            max-width: 100vw !important;
+            width: 100% !important;
+        }}
 
-    /* MOBILE: force tight 2-column grid */
-    @media (max-width: 600px) {
-        div[data-testid="stHorizontalBlock"] {
-            display: grid !important;
-            grid-template-columns: 1fr 1fr !important;
-            gap: 6px !important;
-        }
-    }
+        .stButton > button {{
+            font-size: 11px !important;
+            padding: 3% 2% !important;
+            min-height: 40px !important;
+            margin: 1.5% 0 !important;
+        }}
 
-    /* DESKTOP / LANDSCAPE: stop grid stretching */
-    @media (min-width: 601px) {
-        div[data-testid="stHorizontalBlock"] {
-            display: flex !important;
-            justify-content: space-between !important;
-            gap: 8px !important;
-        }
+        div[data-testid="stHorizontalBlock"] {{
+            gap: 2% !important;
+            padding: 0 2% !important;
+        }}
 
-        /* Prevent columns from expanding */
-        div[data-testid="column"] {
-            flex: 0 0 auto !important;
-            max-width: 240px !important;   /* 👈 key fix */
-        }
-    }
+        h1 {{ font-size: 18px !important; }}
+        h2 {{ font-size: 15px !important; }}
+        h3 {{ font-size: 14px !important; }}
+        h4 {{ font-size: 13px !important; }}
+
+        .stTextInput, .stNumberInput {{
+            margin-bottom: 2% !important;
+        }}
+    }}
+
+    /* ============================================
+       DESKTOP / LANDSCAPE MODE (> 600px)
+       ============================================ */
+
+    @media (min-width: 601px) {{
+        div[data-testid="stHorizontalBlock"] {{
+            gap: 2% !important;
+            max-width: 500px !important;
+        }}
+
+        div[data-testid="column"] {{
+            max-width: 48% !important;
+        }}
+
+        .stButton > button {{
+            padding: 2.5% 3% !important;
+            min-height: 44px !important;
+            font-size: 13px !important;
+        }}
+    }}
+
+    /* ============================================
+       LOGOUT BUTTON - MUST BE LAST TO OVERRIDE
+       Only targets the specific logout button
+       ============================================ */
+
+    /* Logout button - specific selector using key attribute */
+    .stButton:has(button[key="logout_btn"]) {{
+        display: inline-flex !important;
+        justify-content: flex-end !important;
+        width: auto !important;
+    }}
+
+    .stButton > button[key="logout_btn"] {{
+        padding: 2.5% 5% !important;
+        font-size: 14px !important;
+        min-height: 40px !important;
+        background: #ffb347 !important;
+        color: white !important;
+        border: 2px solid #ff9933 !important;
+        border-radius: 6px !important;
+        cursor: pointer !important;
+        white-space: nowrap !important;
+        font-weight: 700 !important;
+        display: inline-block !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+        box-shadow: 0 2px 4px rgba(255, 153, 51, 0.3) !important;
+        width: auto !important;
+        max-width: none !important;
+        margin: 0 !important;
+        font-family: {APP_FONT_FAMILY} !important;
+    }}
+
+    .stButton > button[key="logout_btn"]:hover {{
+        background: #ff9933 !important;
+        transform: scale(1.05) !important;
+        box-shadow: 0 4px 8px rgba(255, 153, 51, 0.5) !important;
+    }}
 
     </style>
     """,
@@ -1101,15 +843,9 @@ if not st.session_state.logged_in:
         st.error("Could not connect to Google Sheets")
 
 else:
-    # Logout button at top right
-    with st.container():
-        st.markdown(
-            """
-        <div class="logout-bar">
-        """,
-            unsafe_allow_html=True,
-        )
-
+    # Logout button at top right - using container with CSS positioning
+    logout_container = st.container()
+    with logout_container:
         if st.button("Logout", key="logout_btn", type="secondary"):
             st.session_state.logged_in = False
             st.session_state.username = ""
@@ -1119,8 +855,6 @@ else:
             st.session_state.payment_mode = None
             st.rerun()
 
-        st.markdown("</div>", unsafe_allow_html=True)
-
     spreadsheet = get_google_sheet()
     if spreadsheet:
         trans_sheet = get_transactions_sheet(spreadsheet)
@@ -1129,7 +863,8 @@ else:
 
             # Only fetch data when refresh_data flag is True
             if st.session_state.refresh_data:
-                st.session_state.transactions_df = get_transactions(trans_sheet)
+                with st.spinner("Loading transactions..."):
+                    st.session_state.transactions_df = get_transactions(trans_sheet)
                 st.session_state.refresh_data = False
 
             df = st.session_state.transactions_df
@@ -1137,19 +872,48 @@ else:
             if not df.empty and not st.session_state.is_admin:
                 user_df = df[df["User"] == st.session_state.username]
 
+            # Welcome message
+            st.markdown(f"### Welcome, {st.session_state.display_name}!")
+
             # TODAY'S KPI BOXES - Paid and Received side by side, Balance below
-            st.markdown("### Today's Summary")
+            st.markdown("#### Today's Summary")
             today_paid, today_received, today_balance = get_today_stats(
                 user_df, st.session_state.username, st.session_state.is_admin
             )
 
             col1, col2 = st.columns(2)
             with col1:
-                st.metric("Paid", f"₹{today_paid:,.0f}")
+                st.markdown(
+                    f"""<div style="background:#ffe6e6; padding:3%; border-radius:4px; border-left:4px solid #dc3545;
+                    display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:70px;
+                    font-family:{APP_FONT_FAMILY};">
+                    <span style="font-size:11px; color:#666; font-family:{APP_FONT_FAMILY};">PAID</span>
+                    <span style="font-size:18px; font-weight:bold; color:#dc3545; font-family:{APP_FONT_FAMILY};">₹{today_paid:,.0f}</span>
+                    </div>""",
+                    unsafe_allow_html=True,
+                )
             with col2:
-                st.metric("Received", f"₹{today_received:,.0f}")
+                st.markdown(
+                    f"""<div style="background:#e6ffe6; padding:3%; border-radius:4px; border-left:4px solid #28a745;
+                    display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:70px;
+                    font-family:{APP_FONT_FAMILY};">
+                    <span style="font-size:11px; color:#666; font-family:{APP_FONT_FAMILY};">RECEIVED</span>
+                    <span style="font-size:18px; font-weight:bold; color:#28a745; font-family:{APP_FONT_FAMILY};">₹{today_received:,.0f}</span>
+                    </div>""",
+                    unsafe_allow_html=True,
+                )
 
-            st.metric("Balance", f"₹{today_balance:,.0f}")
+            balance_color = "#28a745" if today_balance >= 0 else "#dc3545"
+            balance_bg = "#e6ffe6" if today_balance >= 0 else "#ffe6e6"
+            st.markdown(
+                f"""<div style="background:{balance_bg}; padding:3%; border-radius:4px; border-left:4px solid {balance_color}; margin-top:2%;
+                display:flex; flex-direction:column; justify-content:center; align-items:center; min-height:70px;
+                font-family:{APP_FONT_FAMILY};">
+                <span style="font-size:11px; color:#666; font-family:{APP_FONT_FAMILY};">NET BALANCE</span>
+                <span style="font-size:18px; font-weight:bold; color:{balance_color}; font-family:{APP_FONT_FAMILY};">₹{today_balance:,.0f}</span>
+                </div>""",
+                unsafe_allow_html=True,
+            )
 
             # TABS
             if st.session_state.is_admin:
@@ -1160,27 +924,26 @@ else:
                 tab1, tab2 = st.tabs(["New Entry", "Download Statement"])
 
             with tab1:
-                st.header("New Entry")
-
+                st.caption("Fields marked with * are required")
                 name = st.text_input(
-                    "Name",
+                    "Name *",
                     placeholder="Enter person/vendor name",
                     key="name_field",
                 )
                 amount = st.number_input(
-                    "Amount (₹)",
+                    "Amount (₹) *",
                     min_value=0.0,
                     step=10.0,
                     format="%.0f",
                     key="amount_field",
                 )
                 description = st.text_input(
-                    "Purpose",
+                    "Purpose (optional)",
                     placeholder="Add details...",
                     key="desc_field",
                 )
 
-                st.subheader("Type")
+                st.subheader("Type *")
                 # Hardcoded 2 columns for Type buttons
                 col1, col2 = st.columns([1, 1])
                 with col1:
@@ -1213,7 +976,7 @@ else:
                         st.rerun()
 
                 # Payment Mode Buttons - Hardcoded 2x2 layout (2 rows, 2 columns)
-                st.subheader("Payment Mode")
+                st.subheader("Payment Mode *")
 
                 # Row 1: Online and GPay
                 col1, col2 = st.columns([1, 1])
@@ -1279,22 +1042,30 @@ else:
 
                 st.markdown("")  # spacing
 
+                # Show real-time validation status
+                missing_fields = []
+                if not name:
+                    missing_fields.append("Name")
+                if amount <= 0:
+                    missing_fields.append("Amount")
+                if not st.session_state.transaction_type:
+                    missing_fields.append("Type")
+                if not st.session_state.payment_mode:
+                    missing_fields.append("Payment Mode")
+
+                if missing_fields:
+                    st.warning(f"Please fill: {', '.join(missing_fields)}")
+
                 # Submit button
+                submit_disabled = len(missing_fields) > 0
                 if st.button(
                     "Submit Transaction",
                     use_container_width=True,
                     type="primary",
                     key="btn_submit",
+                    disabled=submit_disabled,
                 ):
-                    if not name:
-                        st.error("Please enter a name")
-                    elif amount <= 0:
-                        st.error("Please enter a valid amount")
-                    elif not st.session_state.transaction_type:
-                        st.error("Please select type (Paid or Received)")
-                    elif not st.session_state.payment_mode:
-                        st.error("Please select payment mode")
-                    else:
+                    with st.spinner("Submitting transaction..."):
                         if add_transaction(
                             trans_sheet,
                             name,
@@ -1323,7 +1094,6 @@ else:
                     st.session_state.show_success = False
 
             with tab2:
-                st.header("Download Statement")
                 st.write("Select date range to download your statement")
                 col1, col2 = st.columns(2)
                 with col1:
@@ -1374,7 +1144,7 @@ else:
                             for idx, row in filtered_df.sort_values(
                                 "Timestamp", ascending=False
                             ).iterrows():
-                                type_emoji = "" if row["Type"] == "Paid" else ""
+                                type_icon = "[-]" if row["Type"] == "Paid" else "[+]"
                                 amount_color = (
                                     "red" if row["Type"] == "Paid" else "green"
                                 )
@@ -1386,13 +1156,13 @@ else:
                                     with col1:
                                         st.markdown(f"**{row['Name']}**")
                                         st.caption(
-                                            f"{row['Payment Mode']} • {row['Timestamp'].strftime('%d %b %Y %I:%M %p')}"
+                                            f"{row['Type']} via {row['Payment Mode']} • {row['Timestamp'].strftime('%d %b %Y %I:%M %p')}"
                                         )
                                         if desc_value:
                                             st.caption(f"{desc_value}")
                                     with col2:
                                         st.markdown(
-                                            f"**<span style='color:{amount_color}'>₹{row['Amount']:,.0f}</span>**",
+                                            f"**<span style='color:{amount_color}'>{type_icon} ₹{row['Amount']:,.0f}</span>**",
                                             unsafe_allow_html=True,
                                         )
                                     st.markdown("---")
@@ -1411,13 +1181,16 @@ else:
                                 use_container_width=True,
                             )
                         else:
-                            st.info("No entries found in selected date range.")
+                            st.info(
+                                "No entries found in selected date range. Try adjusting the dates or add new transactions from the 'New Entry' tab."
+                            )
                     else:
-                        st.info("No entries available.")
+                        st.info(
+                            "No entries yet. Start by adding your first transaction in the 'New Entry' tab!"
+                        )
 
             if st.session_state.is_admin:
                 with tab3:
-                    st.header("User Summary")
                     st.write("View summary of all users")
                     col1, col2 = st.columns(2)
                     with col1:
@@ -1476,12 +1249,14 @@ else:
                                         f"₹{user_summary_df['Balance'].sum():,.0f}",
                                     )
                             else:
-                                st.info("No transactions found in selected date range.")
+                                st.info(
+                                    "No transactions found in selected date range. Try selecting a different date range."
+                                )
                         else:
-                            st.info("No transactions available.")
-            else:
-                st.error("Could not access transactions sheet")
+                            st.info(
+                                "No transactions recorded yet. Users can add transactions from their 'New Entry' tab."
+                            )
         else:
-            st.error(
-                "Failed to connect to Google Sheets. Please check your configuration."
-            )
+            st.error("Could not access transactions sheet")
+    else:
+        st.error("Failed to connect to Google Sheets. Please check your configuration.")
