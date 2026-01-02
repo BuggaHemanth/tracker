@@ -970,14 +970,13 @@ else:
         st.rerun()
 
     st.markdown("</div>", unsafe_allow_html=True)
-
-            st.session_state.logged_in = False
-            st.session_state.username = ""
-            st.session_state.display_name = ""
-            st.session_state.is_admin = False
-            st.session_state.transaction_type = None
-            st.session_state.payment_mode = None
-            st.rerun()
+    st.session_state.logged_in = False
+    st.session_state.username = ""
+    st.session_state.display_name = ""
+    st.session_state.is_admin = False
+    st.session_state.transaction_type = None
+    st.session_state.payment_mode = None
+    st.rerun()
 
     spreadsheet = get_google_sheet()
     if spreadsheet:
