@@ -632,13 +632,16 @@ st.markdown(
             padding: 4px !important;
         }
 
-        /* Ensure 50/50 split in portrait */
-        div[data-testid="column"] {
-            width: 50% !important;
-            min-width: 50% !important;
-            max-width: 50% !important;
-            flex: 0 0 50% !important;
-        }
+    /* Force true 50% columns */
+    div[data-testid="column"] {
+        flex: 0 0 50% !important;
+        width: 50% !important;
+        max-width: 50% !important;
+        min-width: 0 !important;          /* 🔑 allows shrinking */
+        box-sizing: border-box !important;
+        padding: 2px !important;
+    }
+
 
         div[data-testid="stHorizontalBlock"] {
             gap: 0px !important;
@@ -661,18 +664,46 @@ st.markdown(
             gap: 4px !important;
         }
 
-        div[data-testid="column"] {
-            width: calc(50% - 2px) !important;
-            min-width: calc(50% - 2px) !important;
-            max-width: calc(50% - 2px) !important;
-            flex: 0 0 calc(50% - 2px) !important;
-        }
+    /* Force true 50% columns */
+    div[data-testid="column"] {
+        flex: 0 0 50% !important;
+        width: 50% !important;
+        max-width: 50% !important;
+        min-width: 0 !important;          /* 🔑 allows shrinking */
+        box-sizing: border-box !important;
+        padding: 2px !important;
+    }
+
 
         .stButton > button {
             padding: 8px 6px !important;
             min-height: 40px !important;
         }
     }
+    /* STEP 2: Force button container to respect column width */
+    [data-testid="column"] .stButton {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+    box-sizing: border-box !important;
+    }
+
+    /* STEP 3: Force the button itself to not exceed 50% column */
+    .stButton > button {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-width: 0 !important;
+
+    padding: 6px 4px !important;
+    font-size: 10px !important;
+
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    }
+
+
+    
     </style>
     """,
     unsafe_allow_html=True,
