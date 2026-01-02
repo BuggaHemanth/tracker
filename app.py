@@ -417,18 +417,16 @@ st.markdown(
        TYPOGRAPHY
        ============================================ */
 
+    /* All headings - same font, size, and style */
     h1, h2, h3, h4 {{
         color: rgb(0, 0, 104) !important;
         padding-left: 2% !important;
         padding-right: 2% !important;
         font-family: {APP_FONT_FAMILY} !important;
         font-weight: 700 !important;
+        font-size: 16px !important;
+        margin: 4px 0 !important;
     }}
-
-    h1 {{ font-size: 22px !important; margin: 2% 0 !important; }}
-    h2 {{ font-size: 18px !important; margin: 3% 0 2% 0 !important; }}
-    h3 {{ font-size: 16px !important; margin: 4px 0 !important; }}
-    h4 {{ font-size: 14px !important; margin: 0 !important; padding: 0 !important; }}
 
     label, .stMarkdown p {{
         color: rgb(0, 0, 104) !important;
@@ -761,75 +759,37 @@ st.markdown(
     }}
 
     /* ============================================
-       LOGOUT BUTTON ROW - Title + Logout on same line
+       TOP BUTTONS ROW - Statement + Logout side by side
        ============================================ */
 
-    /* Title + Logout row - flex layout with space between */
+    /* Top buttons row */
     div[data-testid="stHorizontalBlock"]:has(button[key="logout_btn"]) {{
-        display: flex !important;
-        flex-direction: row !important;
-        justify-content: space-between !important;
-        align-items: center !important;
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 8px !important;
         padding: 4px 2% !important;
         margin: 0 !important;
         margin-top: 0 !important;
-        padding-top: 4px !important;
-        gap: 8px !important;
-    }}
-
-    /* Title column - left aligned, takes available space */
-    div[data-testid="stHorizontalBlock"]:has(button[key="logout_btn"]) > div[data-testid="column"]:first-child {{
-        display: flex !important;
-        align-items: center !important;
-        justify-content: flex-start !important;
-        flex: 1 !important;
-    }}
-
-    /* Logout column - right aligned, auto width */
-    div[data-testid="stHorizontalBlock"]:has(button[key="logout_btn"]) > div[data-testid="column"]:last-child {{
-        display: flex !important;
-        align-items: center !important;
-        justify-content: flex-end !important;
-        flex: 0 0 auto !important;
-        min-width: 80px !important;
-    }}
-
-    /* Logout button container */
-    .stButton:has(button[key="logout_btn"]) {{
-        display: flex !important;
-        justify-content: flex-end !important;
-        width: auto !important;
-        margin: 0 !important;
     }}
 
     /* Logout button styling - Light Orange */
     .stButton > button[key="logout_btn"] {{
-        padding: 6px 16px !important;
-        font-size: 12px !important;
-        min-height: 32px !important;
         background: #FFD699 !important;
         color: #333 !important;
         border: 1px solid #FFB84D !important;
-        border-radius: 6px !important;
-        cursor: pointer !important;
-        white-space: nowrap !important;
-        font-weight: 600 !important;
-        display: inline-flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        box-shadow: 0 2px 4px rgba(255, 180, 77, 0.3) !important;
-        width: auto !important;
-        max-width: none !important;
-        margin: 0 !important;
         font-family: {APP_FONT_FAMILY} !important;
     }}
 
     .stButton > button[key="logout_btn"]:hover {{
         background: #FFB84D !important;
-        transform: scale(1.02) !important;
-        box-shadow: 0 4px 8px rgba(255, 180, 77, 0.4) !important;
+    }}
+
+    /* Statement button styling */
+    .stButton > button[key="download_stmt_btn"] {{
+        background: #e6f2ff !important;
+        color: rgb(0, 0, 104) !important;
+        border: 1px solid #99ccff !important;
+        font-family: {APP_FONT_FAMILY} !important;
     }}
 
     </style>
@@ -858,6 +818,8 @@ if "refresh_data" not in st.session_state:
     st.session_state.refresh_data = True
 if "transactions_df" not in st.session_state:
     st.session_state.transactions_df = pd.DataFrame()
+if "show_download" not in st.session_state:
+    st.session_state.show_download = False
 
 # Login/Registration section
 if not st.session_state.logged_in:
@@ -989,12 +951,13 @@ else:
             if not df.empty and not st.session_state.is_admin:
                 user_df = df[df["User"] == st.session_state.username]
 
-            # Title row with logout button on right
-            title_col, logout_col = st.columns([3, 1])
-            with title_col:
-                st.markdown("#### Today's Summary")
-            with logout_col:
-                if st.button("Logout", key="logout_btn", type="secondary"):
+            # Top row: Download Statement and Logout buttons side by side
+            btn_col1, btn_col2 = st.columns([1, 1])
+            with btn_col1:
+                if st.button("📥 Statement", key="download_stmt_btn", type="secondary", use_container_width=True):
+                    st.session_state.show_download = True
+            with btn_col2:
+                if st.button("Logout", key="logout_btn", type="secondary", use_container_width=True):
                     st.session_state.logged_in = False
                     st.session_state.username = ""
                     st.session_state.display_name = ""
@@ -1043,278 +1006,84 @@ else:
                 unsafe_allow_html=True,
             )
 
-            # TABS
-            if st.session_state.is_admin:
-                tab1, tab2, tab3 = st.tabs(
-                    ["New Entry", "📥 Download Statement", "User Summary"]
-                )
-            else:
-                tab1, tab2 = st.tabs(["New Entry", "📥 Download Statement"])
-
-            with tab1:
-                name = st.text_input(
-                    "Name *",
-                    placeholder="Enter person/vendor name",
-                    key="name_field",
-                )
-                amount = st.number_input(
-                    "Amount (₹) *",
-                    min_value=0.0,
-                    step=10.0,
-                    format="%.0f",
-                    key="amount_field",
-                )
-                description = st.text_input(
-                    "Purpose",
-                    placeholder="Add details...",
-                    key="desc_field",
-                )
-
-                st.subheader("Type *")
-                # Hardcoded 2 columns for Type buttons
-                col1, col2 = st.columns([1, 1])
-                with col1:
-                    btn_type = (
-                        "primary"
-                        if st.session_state.transaction_type == "Paid"
-                        else "secondary"
-                    )
-                    if st.button(
-                        "PAID",
-                        use_container_width=True,
-                        type=btn_type,
-                        key="btn_paid",
-                    ):
-                        st.session_state.transaction_type = "Paid"
-                        st.rerun()
-                with col2:
-                    btn_type = (
-                        "primary"
-                        if st.session_state.transaction_type == "Received"
-                        else "secondary"
-                    )
-                    if st.button(
-                        "RECEIVED",
-                        use_container_width=True,
-                        type=btn_type,
-                        key="btn_received",
-                    ):
-                        st.session_state.transaction_type = "Received"
-                        st.rerun()
-
-                # Payment Mode Buttons - Hardcoded 2x2 layout (2 rows, 2 columns)
-                st.subheader("Payment Mode *")
-
-                # Row 1: Cash and Online
-                col1, col2 = st.columns([1, 1])
-                with col1:
-                    btn_type = (
-                        "primary"
-                        if st.session_state.payment_mode == "Cash"
-                        else "secondary"
-                    )
-                    if st.button(
-                        "💰 Cash",
-                        use_container_width=True,
-                        type=btn_type,
-                        key="btn_cash",
-                    ):
-                        st.session_state.payment_mode = "Cash"
-                        st.rerun()
-                with col2:
-                    btn_type = (
-                        "primary"
-                        if st.session_state.payment_mode == "Online"
-                        else "secondary"
-                    )
-                    if st.button(
-                        "💻 Online",
-                        use_container_width=True,
-                        type=btn_type,
-                        key="btn_online",
-                    ):
-                        st.session_state.payment_mode = "Online"
-                        st.rerun()
-
-                # Row 2: PhonePe and GPay
-                col3, col4 = st.columns([1, 1])
-                with col3:
-                    btn_type = (
-                        "primary"
-                        if st.session_state.payment_mode == "PhonePe"
-                        else "secondary"
-                    )
-                    if st.button(
-                        "📱 PhonePe",
-                        use_container_width=True,
-                        type=btn_type,
-                        key="btn_phone",
-                    ):
-                        st.session_state.payment_mode = "PhonePe"
-                        st.rerun()
-                with col4:
-                    btn_type = (
-                        "primary"
-                        if st.session_state.payment_mode == "GPay"
-                        else "secondary"
-                    )
-                    if st.button(
-                        "💳 GPay",
-                        use_container_width=True,
-                        type=btn_type,
-                        key="btn_gpay",
-                    ):
-                        st.session_state.payment_mode = "GPay"
-                        st.rerun()
-
-                st.markdown("")  # spacing
-
-                # Show real-time validation status
-                missing_fields = []
-                if not name:
-                    missing_fields.append("Name")
-                if amount <= 0:
-                    missing_fields.append("Amount")
-                if not st.session_state.transaction_type:
-                    missing_fields.append("Type")
-                if not st.session_state.payment_mode:
-                    missing_fields.append("Payment Mode")
-
-                # Submit button
-                submit_disabled = len(missing_fields) > 0
-                if st.button(
-                    "Submit Transaction",
-                    use_container_width=True,
-                    type="primary",
-                    key="btn_submit",
-                    disabled=submit_disabled,
-                ):
-                    with st.spinner("Submitting transaction..."):
-                        if add_transaction(
-                            trans_sheet,
-                            name,
-                            description,
-                            amount,
-                            st.session_state.transaction_type,
-                            st.session_state.payment_mode,
-                            st.session_state.username,
-                        ):
-                            st.session_state.show_success = True
-                            st.session_state.transaction_type = None
-                            st.session_state.payment_mode = None
-                            st.session_state.refresh_data = True  # Trigger data refresh
-                            # Clear form fields by deleting the keys
-                            if "name_field" in st.session_state:
-                                del st.session_state.name_field
-                            if "amount_field" in st.session_state:
-                                del st.session_state.amount_field
-                            if "desc_field" in st.session_state:
-                                del st.session_state.desc_field
-                            st.rerun()
-
-                # Show success message right after submit button
-                if st.session_state.show_success:
-                    st.success("Transaction submitted successfully!")
-                    st.session_state.show_success = False
-
-            with tab2:
-                st.write("Select date range to download your statement")
-                col1, col2 = st.columns(2)
-                with col1:
-                    start_date = st.date_input(
-                        "Start Date",
-                        value=datetime.now().date() - timedelta(days=30),
-                        max_value=datetime.now().date(),
-                        key="start_date",
-                    )
-                with col2:
-                    end_date = st.date_input(
-                        "End Date",
-                        value=datetime.now().date(),
-                        max_value=datetime.now().date(),
-                        key="end_date",
-                    )
-
-                if start_date > end_date:
-                    st.error("Start date must be before end date")
-                else:
-                    if not user_df.empty:
-                        temp_df = (
-                            user_df.copy()
-                        )  # Avoid modifying the original dataframe
-                        temp_df["Date"] = pd.to_datetime(temp_df["Timestamp"]).dt.date
-                        filtered_df = temp_df[
-                            (temp_df["Date"] >= start_date)
-                            & (temp_df["Date"] <= end_date)
-                        ]
-                        if not filtered_df.empty:
-                            total_paid = filtered_df[filtered_df["Type"] == "Paid"][
-                                "Amount"
-                            ].sum()
-                            total_received = filtered_df[
-                                filtered_df["Type"] == "Received"
-                            ]["Amount"].sum()
-                            balance = total_received - total_paid
-                            st.subheader("Summary")
-                            col1, col2, col3 = st.columns(3)
-                            with col1:
-                                st.metric("Total Paid", f"₹{total_paid:,.0f}")
-                            with col2:
-                                st.metric("Total Received", f"₹{total_received:,.0f}")
-                            with col3:
-                                st.metric("Net Balance", f"₹{balance:,.0f}")
-                            st.markdown("---")
-                            st.subheader(f"All Entries ({len(filtered_df)} total)")
-                            for idx, row in filtered_df.sort_values(
-                                "Timestamp", ascending=False
-                            ).iterrows():
-                                type_icon = "[-]" if row["Type"] == "Paid" else "[+]"
-                                amount_color = (
-                                    "red" if row["Type"] == "Paid" else "green"
-                                )
-                                desc_value = row.get(
-                                    "Description", row.get("Notes", "")
-                                )
-                                with st.container():
-                                    col1, col2 = st.columns([3, 1])
-                                    with col1:
-                                        st.markdown(f"**{row['Name']}**")
-                                        st.caption(
-                                            f"{row['Type']} via {row['Payment Mode']} • {row['Timestamp'].strftime('%d %b %Y %I:%M %p')}"
-                                        )
-                                        if desc_value:
-                                            st.caption(f"{desc_value}")
-                                    with col2:
-                                        st.markdown(
-                                            f"**<span style='color:{amount_color}'>{type_icon} ₹{row['Amount']:,.0f}</span>**",
-                                            unsafe_allow_html=True,
-                                        )
-                                    st.markdown("---")
-                            pdf_buffer = create_pdf_statement(
-                                filtered_df,
-                                start_date,
-                                end_date,
-                                st.session_state.username,
-                                st.session_state.is_admin,
-                            )
-                            st.download_button(
-                                label="Download as PDF",
-                                data=pdf_buffer,
-                                file_name=f"statement_{start_date}_{end_date}.pdf",
-                                mime="application/pdf",
-                                use_container_width=True,
-                            )
-                        else:
-                            st.info(
-                                "No entries found in selected date range. Try adjusting the dates or add new transactions from the 'New Entry' tab."
-                            )
-                    else:
-                        st.info(
-                            "No entries yet. Start by adding your first transaction in the 'New Entry' tab!"
+            # Download Statement Section (shown when button clicked)
+            if st.session_state.show_download:
+                with st.expander("📥 Download Statement", expanded=True):
+                    st.write("Select date range to download your statement")
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        start_date = st.date_input(
+                            "Start Date",
+                            value=datetime.now().date() - timedelta(days=30),
+                            max_value=datetime.now().date(),
+                            key="start_date",
+                        )
+                    with col2:
+                        end_date = st.date_input(
+                            "End Date",
+                            value=datetime.now().date(),
+                            max_value=datetime.now().date(),
+                            key="end_date",
                         )
 
+                    if start_date > end_date:
+                        st.error("Start date must be before end date")
+                    else:
+                        if not user_df.empty:
+                            temp_df = user_df.copy()
+                            temp_df["Date"] = pd.to_datetime(temp_df["Timestamp"]).dt.date
+                            filtered_df = temp_df[
+                                (temp_df["Date"] >= start_date)
+                                & (temp_df["Date"] <= end_date)
+                            ]
+                            if not filtered_df.empty:
+                                total_paid = filtered_df[filtered_df["Type"] == "Paid"]["Amount"].sum()
+                                total_received = filtered_df[filtered_df["Type"] == "Received"]["Amount"].sum()
+                                balance = total_received - total_paid
+                                st.subheader("Summary")
+                                col1, col2, col3 = st.columns(3)
+                                with col1:
+                                    st.metric("Total Paid", f"₹{total_paid:,.0f}")
+                                with col2:
+                                    st.metric("Total Received", f"₹{total_received:,.0f}")
+                                with col3:
+                                    st.metric("Net Balance", f"₹{balance:,.0f}")
+                                st.markdown("---")
+                                st.subheader(f"All Entries ({len(filtered_df)} total)")
+                                for idx, row in filtered_df.sort_values("Timestamp", ascending=False).iterrows():
+                                    type_icon = "[-]" if row["Type"] == "Paid" else "[+]"
+                                    amount_color = "red" if row["Type"] == "Paid" else "green"
+                                    desc_value = row.get("Description", row.get("Notes", ""))
+                                    with st.container():
+                                        col1, col2 = st.columns([3, 1])
+                                        with col1:
+                                            st.markdown(f"**{row['Name']}**")
+                                            st.caption(f"{row['Type']} via {row['Payment Mode']} • {row['Timestamp'].strftime('%d %b %Y %I:%M %p')}")
+                                            if desc_value:
+                                                st.caption(f"{desc_value}")
+                                        with col2:
+                                            st.markdown(f"**<span style='color:{amount_color}'>{type_icon} ₹{row['Amount']:,.0f}</span>**", unsafe_allow_html=True)
+                                        st.markdown("---")
+                                pdf_buffer = create_pdf_statement(filtered_df, start_date, end_date, st.session_state.username, st.session_state.is_admin)
+                                st.download_button(
+                                    label="Download as PDF",
+                                    data=pdf_buffer,
+                                    file_name=f"statement_{start_date}_{end_date}.pdf",
+                                    mime="application/pdf",
+                                    use_container_width=True,
+                                )
+                            else:
+                                st.info("No entries found in selected date range.")
+                        else:
+                            st.info("No entries yet.")
+
+                    if st.button("Close", key="close_download"):
+                        st.session_state.show_download = False
+                        st.rerun()
+
+            # Admin User Summary Section
             if st.session_state.is_admin:
-                with tab3:
+                with st.expander("👥 User Summary", expanded=False):
                     st.write("View summary of all users")
                     col1, col2 = st.columns(2)
                     with col1:
@@ -1336,21 +1105,11 @@ else:
                         st.error("Start date must be before end date")
                     else:
                         if not df.empty:
-                            user_summary_df = get_user_summary(
-                                df, admin_start_date, admin_end_date
-                            )
+                            user_summary_df = get_user_summary(df, admin_start_date, admin_end_date)
                             if not user_summary_df.empty:
-                                st.subheader(
-                                    f"Summary from {admin_start_date.strftime('%d %b %Y')} to {admin_end_date.strftime('%d %b %Y')}"
-                                )
+                                st.subheader(f"Summary from {admin_start_date.strftime('%d %b %Y')} to {admin_end_date.strftime('%d %b %Y')}")
                                 st.dataframe(
-                                    user_summary_df.style.format(
-                                        {
-                                            "Paid": "₹{:,.0f}",
-                                            "Received": "₹{:,.0f}",
-                                            "Balance": "₹{:,.0f}",
-                                        }
-                                    ),
+                                    user_summary_df.style.format({"Paid": "₹{:,.0f}", "Received": "₹{:,.0f}", "Balance": "₹{:,.0f}"}),
                                     use_container_width=True,
                                     hide_index=True,
                                 )
@@ -1358,28 +1117,183 @@ else:
                                 st.subheader("Overall Totals")
                                 col1, col2, col3 = st.columns(3)
                                 with col1:
-                                    st.metric(
-                                        "Total Paid (All Users)",
-                                        f"₹{user_summary_df['Paid'].sum():,.0f}",
-                                    )
+                                    st.metric("Total Paid (All Users)", f"₹{user_summary_df['Paid'].sum():,.0f}")
                                 with col2:
-                                    st.metric(
-                                        "Total Received (All Users)",
-                                        f"₹{user_summary_df['Received'].sum():,.0f}",
-                                    )
+                                    st.metric("Total Received (All Users)", f"₹{user_summary_df['Received'].sum():,.0f}")
                                 with col3:
-                                    st.metric(
-                                        "Total Balance",
-                                        f"₹{user_summary_df['Balance'].sum():,.0f}",
-                                    )
+                                    st.metric("Total Balance", f"₹{user_summary_df['Balance'].sum():,.0f}")
                             else:
-                                st.info(
-                                    "No transactions found in selected date range. Try selecting a different date range."
-                                )
+                                st.info("No transactions found in selected date range.")
                         else:
-                            st.info(
-                                "No transactions recorded yet. Users can add transactions from their 'New Entry' tab."
-                            )
+                            st.info("No transactions recorded yet.")
+
+            # Entry Form (always visible)
+            st.markdown("---")
+            name = st.text_input(
+                "Name *",
+                placeholder="Enter person/vendor name",
+                key="name_field",
+            )
+            amount = st.number_input(
+                "Amount (₹) *",
+                min_value=0.0,
+                step=10.0,
+                format="%.0f",
+                key="amount_field",
+            )
+            description = st.text_input(
+                "Purpose",
+                placeholder="Add details...",
+                key="desc_field",
+            )
+
+            st.subheader("Type *")
+            # Hardcoded 2 columns for Type buttons
+            col1, col2 = st.columns([1, 1])
+            with col1:
+                btn_type = (
+                    "primary"
+                    if st.session_state.transaction_type == "Paid"
+                    else "secondary"
+                )
+                if st.button(
+                    "PAID",
+                    use_container_width=True,
+                    type=btn_type,
+                    key="btn_paid",
+                ):
+                    st.session_state.transaction_type = "Paid"
+                    st.rerun()
+            with col2:
+                btn_type = (
+                    "primary"
+                    if st.session_state.transaction_type == "Received"
+                    else "secondary"
+                )
+                if st.button(
+                    "RECEIVED",
+                    use_container_width=True,
+                    type=btn_type,
+                    key="btn_received",
+                ):
+                    st.session_state.transaction_type = "Received"
+                    st.rerun()
+
+            # Payment Mode Buttons - Hardcoded 2x2 layout (2 rows, 2 columns)
+            st.subheader("Payment Mode *")
+
+            # Row 1: Cash and Online
+            col1, col2 = st.columns([1, 1])
+            with col1:
+                btn_type = (
+                    "primary"
+                    if st.session_state.payment_mode == "Cash"
+                    else "secondary"
+                )
+                if st.button(
+                    "💰 Cash",
+                    use_container_width=True,
+                    type=btn_type,
+                    key="btn_cash",
+                ):
+                    st.session_state.payment_mode = "Cash"
+                    st.rerun()
+            with col2:
+                btn_type = (
+                    "primary"
+                    if st.session_state.payment_mode == "Online"
+                    else "secondary"
+                )
+                if st.button(
+                    "💻 Online",
+                    use_container_width=True,
+                    type=btn_type,
+                    key="btn_online",
+                ):
+                    st.session_state.payment_mode = "Online"
+                    st.rerun()
+
+            # Row 2: PhonePe and GPay
+            col3, col4 = st.columns([1, 1])
+            with col3:
+                btn_type = (
+                    "primary"
+                    if st.session_state.payment_mode == "PhonePe"
+                    else "secondary"
+                )
+                if st.button(
+                    "📱 PhonePe",
+                    use_container_width=True,
+                    type=btn_type,
+                    key="btn_phone",
+                ):
+                    st.session_state.payment_mode = "PhonePe"
+                    st.rerun()
+            with col4:
+                btn_type = (
+                    "primary"
+                    if st.session_state.payment_mode == "GPay"
+                    else "secondary"
+                )
+                if st.button(
+                    "💳 GPay",
+                    use_container_width=True,
+                    type=btn_type,
+                    key="btn_gpay",
+                ):
+                    st.session_state.payment_mode = "GPay"
+                    st.rerun()
+
+            st.markdown("")  # spacing
+
+            # Show real-time validation status
+            missing_fields = []
+            if not name:
+                missing_fields.append("Name")
+            if amount <= 0:
+                missing_fields.append("Amount")
+            if not st.session_state.transaction_type:
+                missing_fields.append("Type")
+            if not st.session_state.payment_mode:
+                missing_fields.append("Payment Mode")
+
+            # Submit button
+            submit_disabled = len(missing_fields) > 0
+            if st.button(
+                "Submit Transaction",
+                use_container_width=True,
+                type="primary",
+                key="btn_submit",
+                disabled=submit_disabled,
+            ):
+                with st.spinner("Submitting transaction..."):
+                    if add_transaction(
+                        trans_sheet,
+                        name,
+                        description,
+                        amount,
+                        st.session_state.transaction_type,
+                        st.session_state.payment_mode,
+                        st.session_state.username,
+                    ):
+                        st.session_state.show_success = True
+                        st.session_state.transaction_type = None
+                        st.session_state.payment_mode = None
+                        st.session_state.refresh_data = True  # Trigger data refresh
+                        # Clear form fields by deleting the keys
+                        if "name_field" in st.session_state:
+                            del st.session_state.name_field
+                        if "amount_field" in st.session_state:
+                            del st.session_state.amount_field
+                        if "desc_field" in st.session_state:
+                            del st.session_state.desc_field
+                        st.rerun()
+
+            # Show success message right after submit button
+            if st.session_state.show_success:
+                st.success("Transaction submitted successfully!")
+                st.session_state.show_success = False
+
         else:
             st.error("Could not access transactions sheet")
     else:
