@@ -319,7 +319,7 @@ st.markdown(
     .block-container {
         background-color: #ffffff;
         border-radius: 8px;
-        padding: 0.4rem !important;
+        padding: 0.2rem !important;
         width: 100% !important;
         max-width: 100vw !important;
         margin: 0 auto !important;
@@ -352,13 +352,13 @@ st.markdown(
         width: 100% !important;
         max-width: 100% !important;
         height: auto !important;
-        min-height: 36px !important;
+        min-height: 28px !important;
         font-size: clamp(9px, 2vw, 11px) !important;
         font-weight: bold;
-        margin: 3px 0 !important;
-        padding: 8px 4px !important;
+        margin: 2px 0 !important;
+        padding: 4px 2px !important;
         border-radius: 4px;
-        border-width: 1px !important;
+        border-width: 0.5px !important;
         transition: none;
         white-space: nowrap;
         box-sizing: border-box !important;
@@ -588,8 +588,8 @@ st.markdown(
 
     /* Ensure main container has no extra padding */
     .main .block-container {
-        padding-left: 0.4rem !important;
-        padding-right: 0.4rem !important;
+        padding-left: 0.2rem !important;
+        padding-right: 0.2rem !important;
     }
 
     /* Success/Error messages */
@@ -621,7 +621,7 @@ st.markdown(
     /* PORTRAIT MODE: Very narrow screens (phones in portrait) */
     @media (max-width: 600px) {
         .block-container {
-            padding: 0.4rem !important;
+            padding: 0.2rem !important;
             max-width: 100vw !important;
             width: 100% !important;
         }
@@ -629,9 +629,9 @@ st.markdown(
         /* Ultra-compact buttons for portrait */
         .stButton > button {
             font-size: 9px !important;
-            padding: 7px 2px !important;
-            min-height: 34px !important;
-            margin: 2px 0 !important;
+            padding: 2px 1px !important;
+            min-height: 26px !important;
+            margin: 1px 0 !important;
         }
 
         /* Smaller metrics for portrait */
