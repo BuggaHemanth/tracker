@@ -441,52 +441,58 @@ st.markdown(
         overflow-wrap: break-word !important;
     }
 
-    /* Force columns to occupy exactly 50% each with minimal spacing */
-    [data-testid="column"] {
-        width: 49.5% !important;
-        min-width: 49.5% !important;
-        max-width: 49.5% !important;
-        flex: 0 0 49.5% !important;
-        flex-basis: 49.5% !important;
-        flex-grow: 0 !important;
-        flex-shrink: 0 !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-
-    /* First column - tiny right padding */
-    div[data-testid="column"]:first-child {
-        padding-right: 1px !important;
-        padding-left: 0 !important;
-    }
-
-    /* Last column - tiny left padding */
-    div[data-testid="column"]:last-child {
-        padding-left: 1px !important;
-        padding-right: 0 !important;
-    }
-
-    /* Middle columns if any */
-    div[data-testid="column"]:not(:first-child):not(:last-child) {
-        padding: 0 0.5px !important;
-    }
-
-    /* Force horizontal layout - no gap */
-    .row-widget.stHorizontal {
-        display: flex !important;
-        flex-direction: row !important;
-        gap: 0 !important;
-        width: 100% !important;
-    }
-
-    /* Ensure columns parent container stays horizontal */
+    /* Match column container width to submit button width */
     div[data-testid="stHorizontalBlock"] {
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: nowrap !important;
         width: 100% !important;
-        overflow: visible !important;
-        gap: 0 !important;
+        max-width: 100% !important;
+        overflow: hidden !important;
+        gap: 2px !important;
+        box-sizing: border-box !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* Force columns to split available width perfectly in half */
+    [data-testid="column"] {
+        width: calc(50% - 1px) !important;
+        min-width: calc(50% - 1px) !important;
+        max-width: calc(50% - 1px) !important;
+        flex: 0 0 calc(50% - 1px) !important;
+        flex-basis: calc(50% - 1px) !important;
+        flex-grow: 0 !important;
+        flex-shrink: 0 !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        box-sizing: border-box !important;
+    }
+
+    /* Remove all column spacing */
+    div[data-testid="column"]:first-child {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    div[data-testid="column"]:last-child {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    div[data-testid="column"]:not(:first-child):not(:last-child) {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    /* Remove any layout gaps */
+    .row-widget.stHorizontal {
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 2px !important;
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
 
     /* Tabs - Reduced spacing */
@@ -533,7 +539,7 @@ st.markdown(
         margin-bottom: 6px !important;
     }
 
-    /* Force button columns to be equal width and fit */
+    /* Force all elements inside columns to fit */
     [data-testid="column"] > div {
         width: 100% !important;
         max-width: 100% !important;
@@ -542,27 +548,26 @@ st.markdown(
         margin: 0 !important;
     }
 
-    /* Prevent column overflow */
-    div[data-testid="stHorizontalBlock"] {
-        width: 100% !important;
-        max-width: 100% !important;
-        box-sizing: border-box !important;
-        padding: 0 !important;
-        margin: 0 !important;
-    }
-
-    /* Ensure button containers don't add extra width */
+    /* Ensure button containers match column width exactly */
     .stButton {
         width: 100% !important;
         max-width: 100% !important;
         margin: 0 !important;
         padding: 0 !important;
+        box-sizing: border-box !important;
     }
 
     /* Ensure all child divs respect parent width */
     [data-testid="column"] * {
         max-width: 100% !important;
         box-sizing: border-box !important;
+    }
+
+    /* Remove any default streamlit element spacing */
+    [data-testid="column"] .element-container {
+        width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
 
     /* Success/Error messages */
@@ -618,19 +623,13 @@ st.markdown(
         }
 
         div[data-testid="column"] {
-            width: 49.5% !important;
-            min-width: 49.5% !important;
-            max-width: 49.5% !important;
+            width: calc(50% - 1px) !important;
+            min-width: calc(50% - 1px) !important;
+            max-width: calc(50% - 1px) !important;
         }
 
-        div[data-testid="column"]:first-child {
-            padding-right: 0.5px !important;
-            padding-left: 0 !important;
-        }
-
-        div[data-testid="column"]:last-child {
-            padding-left: 0.5px !important;
-            padding-right: 0 !important;
+        div[data-testid="stHorizontalBlock"] {
+            gap: 2px !important;
         }
 
         h1 { font-size: 16px !important; }
@@ -699,7 +698,9 @@ if not st.session_state.logged_in:
                                 st.session_state.username = username
                                 st.session_state.display_name = name
                                 st.session_state.is_admin = role == "admin"
-                                st.session_state.refresh_data = True  # Fetch data on login
+                                st.session_state.refresh_data = (
+                                    True  # Fetch data on login
+                                )
                                 st.rerun()
                             else:
                                 st.error("Invalid username or password")
@@ -1004,7 +1005,9 @@ else:
                     st.error("Start date must be before end date")
                 else:
                     if not user_df.empty:
-                        temp_df = user_df.copy()  # Avoid modifying the original dataframe
+                        temp_df = (
+                            user_df.copy()
+                        )  # Avoid modifying the original dataframe
                         temp_df["Date"] = pd.to_datetime(temp_df["Timestamp"]).dt.date
                         filtered_df = temp_df[
                             (temp_df["Date"] >= start_date)
