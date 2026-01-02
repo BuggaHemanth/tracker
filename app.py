@@ -944,6 +944,35 @@ div[data-testid="stHorizontalBlock"] {
         cursor: pointer !important;
     }
 
+
+    /* ================================
+    FIX HUGE GAP INSIDE WHITE CARD
+    ================================ */
+
+    /* MOBILE: force tight 2-column grid */
+    @media (max-width: 600px) {
+        div[data-testid="stHorizontalBlock"] {
+            display: grid !important;
+            grid-template-columns: 1fr 1fr !important;
+            gap: 6px !important;
+        }
+    }
+
+    /* DESKTOP / LANDSCAPE: stop grid stretching */
+    @media (min-width: 601px) {
+        div[data-testid="stHorizontalBlock"] {
+            display: flex !important;
+            justify-content: space-between !important;
+            gap: 8px !important;
+        }
+
+        /* Prevent columns from expanding */
+        div[data-testid="column"] {
+            flex: 0 0 auto !important;
+            max-width: 240px !important;   /* 👈 key fix */
+        }
+    }
+
     </style>
     """,
     unsafe_allow_html=True,
@@ -1290,9 +1319,7 @@ else:
                             st.session_state.show_success = True
                             st.session_state.transaction_type = None
                             st.session_state.payment_mode = None
-                            st.session_state.refresh_data = (
-                                True  # Trigger data refresh
-                            )
+                            st.session_state.refresh_data = True  # Trigger data refresh
                             # Clear form fields by deleting the keys
                             if "name_field" in st.session_state:
                                 del st.session_state.name_field
@@ -1333,9 +1360,7 @@ else:
                         temp_df = (
                             user_df.copy()
                         )  # Avoid modifying the original dataframe
-                        temp_df["Date"] = pd.to_datetime(
-                            temp_df["Timestamp"]
-                        ).dt.date
+                        temp_df["Date"] = pd.to_datetime(temp_df["Timestamp"]).dt.date
                         filtered_df = temp_df[
                             (temp_df["Date"] >= start_date)
                             & (temp_df["Date"] <= end_date)
@@ -1353,9 +1378,7 @@ else:
                             with col1:
                                 st.metric("Total Paid", f"₹{total_paid:,.0f}")
                             with col2:
-                                st.metric(
-                                    "Total Received", f"₹{total_received:,.0f}"
-                                )
+                                st.metric("Total Received", f"₹{total_received:,.0f}")
                             with col3:
                                 st.metric("Net Balance", f"₹{balance:,.0f}")
                             st.markdown("---")
@@ -1465,9 +1488,7 @@ else:
                                         f"₹{user_summary_df['Balance'].sum():,.0f}",
                                     )
                             else:
-                                st.info(
-                                    "No transactions found in selected date range."
-                                )
+                                st.info("No transactions found in selected date range.")
                         else:
                             st.info("No transactions available.")
             else:
