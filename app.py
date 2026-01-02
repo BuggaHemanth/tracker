@@ -782,6 +782,39 @@ div[data-testid="stHorizontalBlock"] {
         white-space: nowrap !important;
     }
 
+        /* === KPI ROW (Paid / Received) === */
+    div[data-testid="stHorizontalBlock"]:has([data-testid="stMetric"]) {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 6px !important;            /* 👈 small controlled gap */
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+    
+    /* === PAYMENT MODE BUTTON GRID (2x2) === */
+    div[data-testid="stHorizontalBlock"]:has(button) {
+        gap: 4px !important;        /* 👈 reduce horizontal gap */
+    }
+    
+    [data-testid="column"] {
+        padding: 0 !important;      /* remove extra space */
+    }
+    
+    .stButton {
+        margin-bottom: 4px !important;
+    }
+    
+    /* === STICKY LOGOUT BUTTON === */
+    .logout-bar {
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+        background: white;
+        padding: 6px 8px;
+        display: flex;
+        justify-content: flex-end;
+    }
+
     
     </style>
     """,
@@ -924,11 +957,20 @@ if not st.session_state.logged_in:
 
 else:
     # Logout button at top right
-    col1, col2 = st.columns([7, 2])
-    with col2:
-        if st.button(
-            "Logout", key="logout_btn", use_container_width=True, type="secondary"
-        ):
+   with st.container():
+    st.markdown(
+        """
+        <div class="logout-bar">
+        """,
+        unsafe_allow_html=True,
+    )
+
+    if st.button("Logout", key="logout_btn", type="secondary"):
+        st.session_state.logged_in = False
+        st.rerun()
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
             st.session_state.logged_in = False
             st.session_state.username = ""
             st.session_state.display_name = ""
