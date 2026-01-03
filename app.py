@@ -307,7 +307,7 @@ def create_pdf_statement(df, start_date, end_date, username, is_admin):
 # ============================================
 APP_FONT_FAMILY = "'Roboto', sans-serif"
 
-# Navy Blue Theme CSS - RGB(0,0,104) - Mobile Optimized
+# Navy Blue Theme CSS - RGB(0,0,104) - Fully Responsive
 st.markdown(
     f"""
     <style>
@@ -332,9 +332,8 @@ st.markdown(
         font-family: {APP_FONT_FAMILY} !important;
     }}
 
-
     /* ============================================
-       MAIN LAYOUT - Remove all top gaps
+       MAIN LAYOUT - Base styles
        ============================================ */
 
     .stApp {{
@@ -345,39 +344,14 @@ st.markdown(
         margin: 0 !important;
     }}
 
-    .block-container {{
-        background-color: #ffffff;
-        border-radius: 0px !important;
-        padding: 0 !important;
-        padding-top: 0 !important;
-        width: 100% !important;
-        max-width: 100vw !important;
-        margin: 0 !important;
-        margin-top: 0 !important;
-        overflow-x: hidden !important;
-    }}
-
-    @media (min-width: 500px) {{
-        .block-container {{
-            max-width: 500px !important;
-        }}
+    .stApp > header {{
+        display: none !important;
     }}
 
     .main {{
         padding: 0 !important;
         padding-top: 0 !important;
         margin-top: 0 !important;
-    }}
-
-    .main .block-container {{
-        padding: 0 !important;
-        padding-top: 0 !important;
-        margin-top: 0 !important;
-    }}
-
-    /* Remove Streamlit's default top padding */
-    .stApp > header {{
-        display: none !important;
     }}
 
     .stApp [data-testid="stAppViewContainer"] {{
@@ -390,23 +364,6 @@ st.markdown(
         margin-top: 0 !important;
     }}
 
-    /* First element should have no top margin */
-    .main .block-container > div:first-child {{
-        margin-top: 0 !important;
-        padding-top: 0 !important;
-    }}
-
-    /* Remove all vertical blocks top spacing */
-    [data-testid="stVerticalBlock"] {{
-        gap: 0 !important;
-    }}
-
-    [data-testid="stVerticalBlock"] > div:first-child {{
-        margin-top: 0 !important;
-        padding-top: 0 !important;
-    }}
-
-    /* Ensure app view has no top padding */
     section[data-testid="stMain"] {{
         padding-top: 0 !important;
         margin-top: 0 !important;
@@ -417,18 +374,31 @@ st.markdown(
         margin-top: 0 !important;
     }}
 
+    .main .block-container > div:first-child {{
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }}
+
+    [data-testid="stVerticalBlock"] {{
+        gap: 0 !important;
+    }}
+
+    [data-testid="stVerticalBlock"] > div:first-child {{
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }}
+
+    /* Hide sidebar */
+    section[data-testid="stSidebar"] {{ display: none; }}
+
     /* ============================================
-       TYPOGRAPHY
+       TYPOGRAPHY - Base styles
        ============================================ */
 
-    /* All headings - same font, size, and style */
     h1, h2, h3, h4 {{
         color: rgb(0, 0, 104) !important;
-        padding-left: 2% !important;
-        padding-right: 2% !important;
         font-family: {APP_FONT_FAMILY} !important;
         font-weight: 700 !important;
-        font-size: 16px !important;
         margin: 4px 0 !important;
     }}
 
@@ -438,25 +408,25 @@ st.markdown(
     }}
 
     /* ============================================
-       BUTTONS - Mobile-first with percentage spacing
+       BUTTONS - Base styles
        ============================================ */
+
+    .stButton {{
+        width: 100% !important;
+    }}
 
     .stButton > button {{
         width: 100% !important;
         white-space: normal !important;
         overflow: visible !important;
-        text-overflow: unset !important;
-        line-height: 1.3 !important;
-        font-size: 12px !important;
-        padding: 10px 8px !important;
-        margin: 2px 0 !important;
+        line-height: 1.4 !important;
         border-radius: 4px !important;
         font-family: {APP_FONT_FAMILY} !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
         text-align: center !important;
-        min-height: 40px !important;
+        word-wrap: break-word !important;
     }}
 
     .stButton > button[kind="primary"] {{
@@ -476,34 +446,45 @@ st.markdown(
         box-shadow: 0 2px 8px rgba(0, 0, 104, 0.3) !important;
     }}
 
+    /* Logout button styling - Light Orange */
+    .stButton > button[key="logout_btn"] {{
+        background: #FFD699 !important;
+        color: #333 !important;
+        border: 1px solid #FFB84D !important;
+    }}
+
+    .stButton > button[key="logout_btn"]:hover {{
+        background: #FFB84D !important;
+    }}
+
+    /* Statement button styling */
+    .stButton > button[key="download_stmt_btn"] {{
+        background: #e6f2ff !important;
+        color: rgb(0, 0, 104) !important;
+        border: 1px solid #99ccff !important;
+    }}
+
     /* ============================================
-       FORM INPUTS - Labels styled like subheaders (BOLD)
+       FORM INPUTS - Base styles
        ============================================ */
 
     .stTextInput label,
     .stNumberInput label {{
         color: rgb(0, 0, 104) !important;
-        font-weight: 800 !important;
-        font-size: 16px !important;
-        margin-bottom: 4px !important;
-        padding-left: 2% !important;
+        font-weight: 700 !important;
         font-family: {APP_FONT_FAMILY} !important;
     }}
 
-    /* Ensure label text is bold */
     .stTextInput label p,
     .stNumberInput label p,
     .stTextInput label span,
     .stNumberInput label span {{
-        font-weight: 800 !important;
-        font-size: 16px !important;
+        font-weight: 700 !important;
         color: rgb(0, 0, 104) !important;
     }}
 
     .stTextInput > div > div > input,
     .stNumberInput > div > div > input {{
-        font-size: 15px !important;
-        padding: 8px !important;
         border: 1px solid #99ccff !important;
         border-radius: 4px !important;
         width: 100% !important;
@@ -516,16 +497,6 @@ st.markdown(
         box-shadow: 0 0 0 1px rgba(0, 0, 104, 0.2) !important;
     }}
 
-    /* Reduced gap between form fields */
-    .stTextInput,
-    .stNumberInput {{
-        margin-bottom: 4px !important;
-        width: 100% !important;
-        padding-left: 2% !important;
-        padding-right: 2% !important;
-    }}
-
-    /* Reduce spacing in form field containers */
     .stTextInput > div,
     .stNumberInput > div {{
         margin-bottom: 0 !important;
@@ -539,56 +510,43 @@ st.markdown(
     .stDateInput label {{
         color: rgb(0, 0, 104) !important;
         font-weight: 600 !important;
-        font-size: 14px !important;
         font-family: {APP_FONT_FAMILY} !important;
     }}
 
     .stDateInput > div > div > input {{
-        font-size: 14px !important;
         border: 2px solid #99ccff !important;
         border-radius: 6px !important;
         font-family: {APP_FONT_FAMILY} !important;
     }}
 
     /* ============================================
-       GRID LAYOUT - 2 Column, Centered
+       GRID LAYOUT - Base styles
        ============================================ */
 
     div[data-testid="stHorizontalBlock"] {{
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
+        display: flex !important;
+        flex-direction: row !important;
         width: 100% !important;
-        max-width: 100% !important;
-        gap: 8px !important;
-        padding: 0 2% !important;
-        margin: 4px 0 !important;
         overflow-x: hidden !important;
-        justify-items: center !important;
-        align-items: center !important;
+        align-items: stretch !important;
     }}
 
     div[data-testid="column"] {{
+        flex: 1 1 0 !important;
         width: 100% !important;
-        max-width: 100% !important;
         min-width: 0 !important;
         padding: 0 !important;
         margin: 0 !important;
         display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
+        flex-direction: column !important;
+        align-items: stretch !important;
     }}
 
     [data-testid="column"] .stButton {{
         width: 100% !important;
-        max-width: 100% !important;
-        min-width: 0 !important;
-        margin: 2px 0 !important;
-        display: flex !important;
-        justify-content: center !important;
-        align-items: center !important;
+        flex: 1 !important;
     }}
 
-    /* Center markdown content in columns (for KPI cards) */
     [data-testid="column"] .stMarkdown {{
         width: 100% !important;
         display: flex !important;
@@ -601,48 +559,12 @@ st.markdown(
     }}
 
     /* ============================================
-       TABS
-       ============================================ */
-
-    .stTabs {{
-        margin-top: 2% !important;
-        margin-bottom: 0 !important;
-    }}
-
-    .stTabs [data-baseweb="tab-list"] {{
-        gap: 1%;
-        background-color: #e6f2ff;
-        border-radius: 8px;
-        padding: 1%;
-        margin-bottom: 0 !important;
-    }}
-
-    .stTabs [data-baseweb="tab"] {{
-        color: rgb(0, 0, 104) !important;
-        font-weight: 600;
-        font-size: 14px !important;
-        padding: 2% 3% !important;
-        font-family: {APP_FONT_FAMILY} !important;
-    }}
-
-    .stTabs [aria-selected="true"] {{
-        background: rgb(0, 0, 104) !important;
-        color: white !important;
-    }}
-
-    .stTabs [data-baseweb="tab-panel"] {{
-        padding-top: 2% !important;
-        margin-top: 0 !important;
-    }}
-
-    /* ============================================
        ALERTS / MESSAGES
        ============================================ */
 
     .stSuccess {{
         background-color: #d4edda !important;
         color: #155724 !important;
-        padding: 3% !important;
         border-radius: 8px !important;
         border-left: 4px solid #28a745 !important;
         font-weight: bold !important;
@@ -659,43 +581,10 @@ st.markdown(
     .stInfo {{
         background-color: #d1ecf1 !important;
         color: #0c5460 !important;
-        font-size: 14px !important;
         font-family: {APP_FONT_FAMILY} !important;
     }}
 
     .stWarning {{
-        font-family: {APP_FONT_FAMILY} !important;
-    }}
-
-    /* Hide sidebar */
-    section[data-testid="stSidebar"] {{ display: none; }}
-
-    /* ============================================
-       LOGIN/REGISTER BUTTONS - Special styling
-       ============================================ */
-
-    button[key="login_btn"],
-    button[key="register_btn"],
-    button[key="create_account_btn"],
-    button[key="back_login_btn"] {{
-        padding: 3% 5% !important;
-        font-size: 15px !important;
-        min-height: 44px !important;
-        margin: 2% 0 !important;
-        font-family: {APP_FONT_FAMILY} !important;
-    }}
-
-    /* Login page text inputs */
-    input[key="login_username"],
-    input[key="login_password"],
-    input[key="reg_name"],
-    input[key="reg_phone"],
-    input[key="reg_username"],
-    input[key="reg_password"],
-    input[key="reg_confirm_password"] {{
-        font-size: 16px !important;
-        padding: 3% !important;
-        min-height: 42px !important;
         font-family: {APP_FONT_FAMILY} !important;
     }}
 
@@ -709,91 +598,195 @@ st.markdown(
     }}
 
     /* ============================================
-       MOBILE PORTRAIT MODE (< 600px)
+       MOBILE MODE (max-width: 600px)
        ============================================ */
 
     @media (max-width: 600px) {{
         .block-container {{
-            padding: 0 !important;
-            max-width: 100vw !important;
+            background-color: #ffffff;
+            border-radius: 0px !important;
+            padding: 8px 12px !important;
+            padding-top: 0 !important;
             width: 100% !important;
+            max-width: 100vw !important;
+            margin: 0 !important;
+            margin-top: 0 !important;
+            overflow-x: hidden !important;
+        }}
+
+        .main .block-container {{
+            padding: 8px 12px !important;
+            padding-top: 0 !important;
+        }}
+
+        h1, h2, h3, h4 {{
+            font-size: 14px !important;
+            padding-left: 4px !important;
+            padding-right: 4px !important;
         }}
 
         .stButton > button {{
-            font-size: 11px !important;
-            padding: 3% 2% !important;
-            min-height: 40px !important;
-            margin: 1.5% 0 !important;
+            font-size: 13px !important;
+            padding: 10px 12px !important;
+            min-height: 44px !important;
+            margin: 4px 0 !important;
         }}
 
         div[data-testid="stHorizontalBlock"] {{
-            gap: 2% !important;
-            padding: 0 2% !important;
-        }}
-
-        h1 {{ font-size: 18px !important; }}
-        h2 {{ font-size: 15px !important; }}
-        h3 {{ font-size: 14px !important; }}
-        h4 {{ font-size: 13px !important; }}
-
-        .stTextInput, .stNumberInput {{
-            margin-bottom: 2% !important;
-        }}
-    }}
-
-    /* ============================================
-       DESKTOP / LANDSCAPE MODE (> 600px)
-       ============================================ */
-
-    @media (min-width: 601px) {{
-        div[data-testid="stHorizontalBlock"] {{
-            gap: 2% !important;
-            max-width: 500px !important;
+            gap: 8px !important;
+            padding: 0 !important;
+            margin: 6px 0 !important;
         }}
 
         div[data-testid="column"] {{
-            max-width: 48% !important;
+            flex: 1 1 0 !important;
         }}
 
-        .stButton > button {{
-            padding: 2.5% 3% !important;
-            min-height: 44px !important;
+        [data-testid="column"] .stButton {{
+            margin: 4px 0 !important;
+            width: 100% !important;
+        }}
+
+        .stTextInput,
+        .stNumberInput {{
+            margin-bottom: 8px !important;
+            width: 100% !important;
+            padding-left: 4px !important;
+            padding-right: 4px !important;
+        }}
+
+        .stTextInput label,
+        .stNumberInput label {{
+            font-size: 14px !important;
+            margin-bottom: 4px !important;
+            padding-left: 4px !important;
+        }}
+
+        .stTextInput > div > div > input,
+        .stNumberInput > div > div > input {{
+            font-size: 14px !important;
+            padding: 10px !important;
+        }}
+
+        .stDateInput label {{
             font-size: 13px !important;
+        }}
+
+        .stDateInput > div > div > input {{
+            font-size: 13px !important;
+        }}
+
+        .stSuccess, .stError, .stInfo {{
+            padding: 12px !important;
+            font-size: 13px !important;
+        }}
+
+        /* Login page inputs */
+        button[key="login_btn"],
+        button[key="register_btn"],
+        button[key="create_account_btn"],
+        button[key="back_login_btn"] {{
+            padding: 12px 16px !important;
+            font-size: 14px !important;
+            min-height: 44px !important;
         }}
     }}
 
     /* ============================================
-       TOP BUTTONS ROW - Statement + Logout side by side
+       DESKTOP/LAPTOP MODE (min-width: 601px)
        ============================================ */
 
-    /* Top buttons row */
-    div[data-testid="stHorizontalBlock"]:has(button[key="logout_btn"]) {{
-        display: grid !important;
-        grid-template-columns: 1fr 1fr !important;
-        gap: 8px !important;
-        padding: 4px 2% !important;
-        margin: 0 !important;
-        margin-top: 0 !important;
-    }}
+    @media (min-width: 601px) {{
+        .block-container {{
+            background-color: #ffffff;
+            border-radius: 0px !important;
+            padding: 16px 24px !important;
+            padding-top: 0 !important;
+            width: 100% !important;
+            max-width: 500px !important;
+            margin: 0 auto !important;
+            margin-top: 0 !important;
+            overflow-x: hidden !important;
+        }}
 
-    /* Logout button styling - Light Orange */
-    .stButton > button[key="logout_btn"] {{
-        background: #FFD699 !important;
-        color: #333 !important;
-        border: 1px solid #FFB84D !important;
-        font-family: {APP_FONT_FAMILY} !important;
-    }}
+        .main .block-container {{
+            padding: 16px 24px !important;
+            padding-top: 0 !important;
+            max-width: 500px !important;
+            margin: 0 auto !important;
+        }}
 
-    .stButton > button[key="logout_btn"]:hover {{
-        background: #FFB84D !important;
-    }}
+        h1, h2, h3, h4 {{
+            font-size: 16px !important;
+            padding-left: 8px !important;
+            padding-right: 8px !important;
+        }}
 
-    /* Statement button styling */
-    .stButton > button[key="download_stmt_btn"] {{
-        background: #e6f2ff !important;
-        color: rgb(0, 0, 104) !important;
-        border: 1px solid #99ccff !important;
-        font-family: {APP_FONT_FAMILY} !important;
+        .stButton > button {{
+            font-size: 14px !important;
+            padding: 12px 16px !important;
+            min-height: 48px !important;
+            margin: 4px 0 !important;
+        }}
+
+        div[data-testid="stHorizontalBlock"] {{
+            gap: 12px !important;
+            padding: 0 !important;
+            margin: 8px 0 !important;
+        }}
+
+        div[data-testid="column"] {{
+            flex: 1 1 0 !important;
+        }}
+
+        [data-testid="column"] .stButton {{
+            margin: 4px 0 !important;
+            width: 100% !important;
+        }}
+
+        .stTextInput,
+        .stNumberInput {{
+            margin-bottom: 12px !important;
+            width: 100% !important;
+            padding-left: 8px !important;
+            padding-right: 8px !important;
+        }}
+
+        .stTextInput label,
+        .stNumberInput label {{
+            font-size: 15px !important;
+            margin-bottom: 6px !important;
+            padding-left: 4px !important;
+        }}
+
+        .stTextInput > div > div > input,
+        .stNumberInput > div > div > input {{
+            font-size: 15px !important;
+            padding: 12px !important;
+        }}
+
+        .stDateInput label {{
+            font-size: 14px !important;
+        }}
+
+        .stDateInput > div > div > input {{
+            font-size: 14px !important;
+        }}
+
+        .stSuccess, .stError, .stInfo {{
+            padding: 16px !important;
+            font-size: 14px !important;
+        }}
+
+        /* Login page inputs */
+        button[key="login_btn"],
+        button[key="register_btn"],
+        button[key="create_account_btn"],
+        button[key="back_login_btn"] {{
+            padding: 14px 24px !important;
+            font-size: 15px !important;
+            min-height: 48px !important;
+        }}
     }}
 
     </style>
@@ -1189,9 +1182,9 @@ else:
                 st.markdown("---")
 
                 # Row 1: Name field - label on left, input on right
-                name_col1, name_col2 = st.columns([0.17, 0.83], gap="small")
+                name_col1, name_col2 = st.columns([0.25, 0.75], gap="small")
                 with name_col1:
-                    st.markdown(f"<div style='padding-top: 8px; padding-left: 2%; font-weight: 700; color: rgb(0,0,104); font-family: {APP_FONT_FAMILY}; white-space: nowrap;'>Name *</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='padding-top: 8px; font-weight: 700; color: rgb(0,0,104); font-family: {APP_FONT_FAMILY};'>Name *</div>", unsafe_allow_html=True)
                 with name_col2:
                     name = st.text_input(
                         "Name",
@@ -1201,9 +1194,9 @@ else:
                     )
 
                 # Row 2: Amount field - label on left, input on right
-                amt_col1, amt_col2 = st.columns([0.17, 0.83], gap="small")
+                amt_col1, amt_col2 = st.columns([0.25, 0.75], gap="small")
                 with amt_col1:
-                    st.markdown(f"<div style='padding-top: 8px; padding-left: 2%; font-weight: 700; color: rgb(0,0,104); font-family: {APP_FONT_FAMILY}; white-space: nowrap;'>Amount *</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='padding-top: 8px; font-weight: 700; color: rgb(0,0,104); font-family: {APP_FONT_FAMILY};'>Amount *</div>", unsafe_allow_html=True)
                 with amt_col2:
                     amount = st.number_input(
                         "Amount",
@@ -1215,9 +1208,9 @@ else:
                     )
 
                 # Row 3: Purpose field - label on left, input on right
-                desc_col1, desc_col2 = st.columns([0.17, 0.83], gap="small")
+                desc_col1, desc_col2 = st.columns([0.25, 0.75], gap="small")
                 with desc_col1:
-                    st.markdown(f"<div style='padding-top: 8px; padding-left: 2%; font-weight: 700; color: rgb(0,0,104); font-family: {APP_FONT_FAMILY}; white-space: nowrap;'>Purpose</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='padding-top: 8px; font-weight: 700; color: rgb(0,0,104); font-family: {APP_FONT_FAMILY};'>Purpose</div>", unsafe_allow_html=True)
                 with desc_col2:
                     description = st.text_input(
                         "Purpose",
