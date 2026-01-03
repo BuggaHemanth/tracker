@@ -520,20 +520,22 @@ st.markdown(
     }}
 
     /* ============================================
-       GRID LAYOUT - Base styles
+       GRID LAYOUT - Base styles (2-column grid)
        ============================================ */
 
     div[data-testid="stHorizontalBlock"] {{
         display: flex !important;
         flex-direction: row !important;
+        flex-wrap: nowrap !important;
         width: 100% !important;
         overflow-x: hidden !important;
         align-items: stretch !important;
+        gap: 2vw !important;
     }}
 
     div[data-testid="column"] {{
-        flex: 1 1 0 !important;
-        width: 100% !important;
+        flex: 1 1 calc(50% - 1vw) !important;
+        max-width: calc(50% - 1vw) !important;
         min-width: 0 !important;
         padding: 0 !important;
         margin: 0 !important;
@@ -544,7 +546,10 @@ st.markdown(
 
     [data-testid="column"] .stButton {{
         width: 100% !important;
-        flex: 1 !important;
+    }}
+
+    .stButton > button {{
+        width: 100% !important;
     }}
 
     [data-testid="column"] .stMarkdown {{
@@ -625,26 +630,32 @@ st.markdown(
             padding-right: 4px !important;
         }}
 
-        .stButton > button {{
-            font-size: 13px !important;
-            padding: 10px 12px !important;
-            min-height: 44px !important;
-            margin: 4px 0 !important;
-        }}
-
         div[data-testid="stHorizontalBlock"] {{
-            gap: 8px !important;
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+            gap: 2vw !important;
             padding: 0 !important;
             margin: 6px 0 !important;
+            width: 100% !important;
         }}
 
         div[data-testid="column"] {{
-            flex: 1 1 0 !important;
+            flex: 1 1 calc(50% - 1vw) !important;
+            max-width: calc(50% - 1vw) !important;
+            min-width: 0 !important;
         }}
 
         [data-testid="column"] .stButton {{
-            margin: 4px 0 !important;
+            margin: 2px 0 !important;
             width: 100% !important;
+        }}
+
+        .stButton > button {{
+            width: 100% !important;
+            padding: 8px 6px !important;
+            font-size: 12px !important;
+            min-height: 40px !important;
         }}
 
         .stTextInput,
@@ -730,13 +741,19 @@ st.markdown(
         }}
 
         div[data-testid="stHorizontalBlock"] {{
+            display: flex !important;
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
             gap: 12px !important;
             padding: 0 !important;
             margin: 8px 0 !important;
+            width: 100% !important;
         }}
 
         div[data-testid="column"] {{
-            flex: 1 1 0 !important;
+            flex: 1 1 calc(50% - 6px) !important;
+            max-width: calc(50% - 6px) !important;
+            min-width: 0 !important;
         }}
 
         [data-testid="column"] .stButton {{
