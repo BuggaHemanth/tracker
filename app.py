@@ -1189,9 +1189,9 @@ else:
                 st.markdown("---")
 
                 # Row 1: Name field - label on left, input on right
-                name_col1, name_col2 = st.columns([0.22, 0.78], gap="small")
+                name_col1, name_col2 = st.columns([0.17, 0.83], gap="small")
                 with name_col1:
-                    st.markdown(f"<div style='padding-top: 8px; padding-left: 2%; font-weight: 700; color: rgb(0,0,104); font-family: {APP_FONT_FAMILY};'>Name *</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='padding-top: 8px; padding-left: 2%; font-weight: 700; color: rgb(0,0,104); font-family: {APP_FONT_FAMILY}; white-space: nowrap;'>Name *</div>", unsafe_allow_html=True)
                 with name_col2:
                     name = st.text_input(
                         "Name",
@@ -1201,9 +1201,9 @@ else:
                     )
 
                 # Row 2: Amount field - label on left, input on right
-                amt_col1, amt_col2 = st.columns([0.22, 0.78], gap="small")
+                amt_col1, amt_col2 = st.columns([0.17, 0.83], gap="small")
                 with amt_col1:
-                    st.markdown(f"<div style='padding-top: 8px; padding-left: 2%; font-weight: 700; color: rgb(0,0,104); font-family: {APP_FONT_FAMILY};'>Amount *</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='padding-top: 8px; padding-left: 2%; font-weight: 700; color: rgb(0,0,104); font-family: {APP_FONT_FAMILY}; white-space: nowrap;'>Amount *</div>", unsafe_allow_html=True)
                 with amt_col2:
                     amount = st.number_input(
                         "Amount",
@@ -1215,9 +1215,9 @@ else:
                     )
 
                 # Row 3: Purpose field - label on left, input on right
-                desc_col1, desc_col2 = st.columns([0.22, 0.78], gap="small")
+                desc_col1, desc_col2 = st.columns([0.17, 0.83], gap="small")
                 with desc_col1:
-                    st.markdown(f"<div style='padding-top: 8px; padding-left: 2%; font-weight: 700; color: rgb(0,0,104); font-family: {APP_FONT_FAMILY};'>Purpose</div>", unsafe_allow_html=True)
+                    st.markdown(f"<div style='padding-top: 8px; padding-left: 2%; font-weight: 700; color: rgb(0,0,104); font-family: {APP_FONT_FAMILY}; white-space: nowrap;'>Purpose</div>", unsafe_allow_html=True)
                 with desc_col2:
                     description = st.text_input(
                         "Purpose",
