@@ -21,7 +21,7 @@ st.markdown(hide_st_style, unsafe_allow_html=True)
 # Page configuration
 st.set_page_config(
     page_title="Kranthi Industries",
-    page_icon="🏗️",
+    page_icon="ðŸ—ï¸",
     layout="centered",
     initial_sidebar_state="collapsed",
 )
@@ -520,8 +520,8 @@ st.markdown(
     }}
 
     /* ============================================
-       GRID LAYOUT - Base styles (2-column grid)
-       ============================================ */
+    GRID LAYOUT - Base styles (2-column grid)
+    ============================================ */
 
     div[data-testid="stHorizontalBlock"] {{
         display: flex !important;
@@ -530,18 +530,19 @@ st.markdown(
         width: 100% !important;
         overflow-x: hidden !important;
         align-items: stretch !important;
-        gap: 2vw !important;
+        gap: 8px !important;  /* Changed from 2vw to fixed pixels */
     }}
 
     div[data-testid="column"] {{
-        flex: 1 1 calc(50% - 1vw) !important;
-        max-width: calc(50% - 1vw) !important;
+        flex: 1 1 0 !important;  /* Equal flex basis */
+        max-width: 50% !important;  /* Simple 50% */
         min-width: 0 !important;
         padding: 0 !important;
         margin: 0 !important;
         display: flex !important;
         flex-direction: column !important;
         align-items: stretch !important;
+        overflow: hidden !important;  /* Add this */
     }}
 
     [data-testid="column"] .stButton {{
@@ -634,16 +635,18 @@ st.markdown(
             display: flex !important;
             flex-direction: row !important;
             flex-wrap: nowrap !important;
-            gap: 2vw !important;
+            gap: 6px !important;  /* Changed from 2vw */
             padding: 0 !important;
             margin: 6px 0 !important;
             width: 100% !important;
+            overflow-x: hidden !important;  /* Ensure no horizontal scroll */
         }}
 
         div[data-testid="column"] {{
-            flex: 1 1 calc(50% - 1vw) !important;
-            max-width: calc(50% - 1vw) !important;
+            flex: 1 1 0 !important;  /* Equal flex basis */
+            max-width: 50% !important;  /* Simple 50% */
             min-width: 0 !important;
+            overflow: hidden !important;  /* Prevent overflow */
         }}
 
         [data-testid="column"] .stButton {{
@@ -653,9 +656,11 @@ st.markdown(
 
         .stButton > button {{
             width: 100% !important;
-            padding: 8px 6px !important;
-            font-size: 12px !important;
+            padding: 8px 4px !important;  /* Reduced horizontal padding */
+            font-size: 11px !important;  /* Slightly smaller for mobile */
             min-height: 40px !important;
+            white-space: normal !important;
+            word-wrap: break-word !important;
         }}
 
         .stTextInput,
@@ -748,12 +753,14 @@ st.markdown(
             padding: 0 !important;
             margin: 8px 0 !important;
             width: 100% !important;
+            overflow-x: hidden !important;
         }}
 
         div[data-testid="column"] {{
-            flex: 1 1 calc(50% - 6px) !important;
-            max-width: calc(50% - 6px) !important;
+            flex: 1 1 0 !important;  /* Equal flex basis */
+            max-width: 50% !important;
             min-width: 0 !important;
+            overflow: hidden !important;
         }}
 
         [data-testid="column"] .stButton {{
@@ -805,7 +812,29 @@ st.markdown(
             min-height: 48px !important;
         }}
     }}
+    /* ============================================
+   OVERFLOW PREVENTION - Additional safety
+   ============================================ */
 
+    * {{
+        box-sizing: border-box !important;
+    }}
+
+    .stApp, .main, section, div {{
+        overflow-x: hidden !important;
+    }}
+
+    /* Ensure all buttons respect container width */
+    .stButton button {{
+        max-width: 100% !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+    }}
+
+    /* Ensure columns never exceed parent */
+    [data-testid="column"] {{
+        box-sizing: border-box !important;
+    }}
     </style>
     """,
     unsafe_allow_html=True,
@@ -1033,7 +1062,7 @@ else:
 
             # Download Statement Section (shown when button clicked)
             if st.session_state.show_download:
-                with st.expander("📥 Download Statement", expanded=True):
+                with st.expander("ðŸ“¥ Download Statement", expanded=True):
                     st.write("Select date range to download your statement")
                     col1, col2 = st.columns(2)
                     with col1:
@@ -1100,7 +1129,7 @@ else:
                                         with col1:
                                             st.markdown(f"**{row['Name']}**")
                                             st.caption(
-                                                f"{row['Type']} via {row['Payment Mode']} • {row['Timestamp'].strftime('%d %b %Y %I:%M %p')}"
+                                                f"{row['Type']} via {row['Payment Mode']} â€¢ {row['Timestamp'].strftime('%d %b %Y %I:%M %p')}"
                                             )
                                             if desc_value:
                                                 st.caption(f"{desc_value}")
@@ -1131,7 +1160,7 @@ else:
 
             # Admin User Summary Section
             if st.session_state.is_admin:
-                with st.expander("👥 User Summary", expanded=False):
+                with st.expander("ðŸ‘¥ User Summary", expanded=False):
                     st.write("View summary of all users")
                     col1, col2 = st.columns(2)
                     with col1:
@@ -1198,43 +1227,26 @@ else:
             if not st.session_state.show_download:
                 st.markdown("---")
 
-                # Row 1: Name field - label on left, input on right
-                name_col1, name_col2 = st.columns([0.25, 0.75], gap="small")
-                with name_col1:
-                    st.markdown(f"<div style='padding-top: 8px; font-weight: 700; color: rgb(0,0,104); font-family: {APP_FONT_FAMILY};'>Name *</div>", unsafe_allow_html=True)
-                with name_col2:
-                    name = st.text_input(
-                        "Name",
-                        placeholder="Enter person/vendor name",
-                        key="name_field",
-                        label_visibility="collapsed",
-                    )
+                # Simple stacked layout - label above input (Streamlit default)
+                name = st.text_input(
+                    "Name *",
+                    placeholder="Enter person/vendor name",
+                    key="name_field",
+                )
 
-                # Row 2: Amount field - label on left, input on right
-                amt_col1, amt_col2 = st.columns([0.25, 0.75], gap="small")
-                with amt_col1:
-                    st.markdown(f"<div style='padding-top: 8px; font-weight: 700; color: rgb(0,0,104); font-family: {APP_FONT_FAMILY};'>Amount *</div>", unsafe_allow_html=True)
-                with amt_col2:
-                    amount = st.number_input(
-                        "Amount",
-                        min_value=0.0,
-                        step=10.0,
-                        format="%.0f",
-                        key="amount_field",
-                        label_visibility="collapsed",
-                    )
+                amount = st.number_input(
+                    "Amount (₹) *",
+                    min_value=0.0,
+                    step=10.0,
+                    format="%.0f",
+                    key="amount_field",
+                )
 
-                # Row 3: Purpose field - label on left, input on right
-                desc_col1, desc_col2 = st.columns([0.25, 0.75], gap="small")
-                with desc_col1:
-                    st.markdown(f"<div style='padding-top: 8px; font-weight: 700; color: rgb(0,0,104); font-family: {APP_FONT_FAMILY};'>Purpose</div>", unsafe_allow_html=True)
-                with desc_col2:
-                    description = st.text_input(
-                        "Purpose",
-                        placeholder="Add details...",
-                        key="desc_field",
-                        label_visibility="collapsed",
-                    )
+                description = st.text_input(
+                    "Purpose",
+                    placeholder="Add details...",
+                    key="desc_field",
+                )
 
                 st.subheader("Type *")
                 # Hardcoded 2 columns for Type buttons
@@ -1311,7 +1323,7 @@ else:
                         else "secondary"
                     )
                     if st.button(
-                        "📱 PhonePe",
+                        "📱PhonePe",
                         use_container_width=True,
                         type=btn_type,
                         key="btn_phone",
